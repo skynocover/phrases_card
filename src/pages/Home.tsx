@@ -56,6 +56,7 @@ const LanguageSelect = ({
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
+        {/** @ts-ignore */}
         <Typography>{langs[selected]}</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -78,6 +79,7 @@ const LanguageSelect = ({
                       setExpand(false);
                     }}
                   >
+                    {/** @ts-ignore */}
                     {langs[item]}
                   </Button>
                 </div>
