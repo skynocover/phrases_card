@@ -59,7 +59,7 @@ const LanguageSelect = ({
         <Typography>{langs[selected]}</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <div className="grid grid-cols-8 gap-2">
+        <div className="grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2 gap-2">
           {Object.keys(langs)
             .filter((item) => (forbiddenAuto ? item !== 'auto' : true))
             .map((item, index) => {
