@@ -1,5 +1,6 @@
 import axios from 'axios';
 import querystring from 'querystring';
+import cache from 'memory-cache';
 
 const langs = {
   auto: 'Automatic',
@@ -317,11 +318,20 @@ const base = 'https://translate.googleapis.com/translate_a/single';
  * @returns {Promise<{lang:string,text:string[]}>} translated text
  */
 async function translate(text, from, to) {
+  if (from === to) return text;
+  const key = JSON.stringify({ text, from, to });
+
+  // retrun ASAP
+  const get = cache.get(key);
+  if (get) return get;
+
   const { data } = await axios.get(
     `${base}?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURI(text)}`,
   );
 
-  return { lang: data[2], text: data[0]?.map((item) => item[0]) };
+  cache.put(key, { lang: data[2], text: data[0]?.map((item) => item[0]) }, 1000 * 60 * 60);
+
+  return { lang: data[8] ? data[8][3] : data[2], text: data[0]?.map((item) => item[0]) };
 }
 
 export { translate, langs };

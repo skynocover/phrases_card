@@ -13,7 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 
 import { Routes, Route, Link } from 'react-router-dom';
 
-const pages = ['About'];
+const pages = ['About', 'Card'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const ResponsiveAppBar = () => {
@@ -59,7 +59,7 @@ const ResponsiveAppBar = () => {
             </Typography>
           </Link>
 
-          <div className="flex-grow flex md:hidden"></div>
+          <div className="flex flex-grow md:hidden"></div>
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <Menu
               id="menu-appbar"

@@ -8,10 +8,10 @@ import { PaletteMode } from '@mui/material';
 
 import Home from './pages/Home';
 import About from './pages/About';
+import Card from './pages/Card';
 
 import Header from './components/Header';
-import { Box, Card, Paper } from '@mui/material';
-// import './App.css';
+import { Paper } from '@mui/material';
 
 import Button from '@mui/material/Button';
 
@@ -34,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="about" element={<About />} />
+          <Route path="card" element={<Card />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Paper>
