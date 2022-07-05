@@ -13,8 +13,8 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 import { translate, langs } from '../components/translate.js';
-import { cardDB, cardStorage } from '../utils/phrases.db';
-import { settingDB, settingStorage } from '../utils/setting.db';
+import { cardStorage } from '../utils/phrases.db';
+import { settingStorage } from '../utils/setting.db';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { speak } from '../utils/speak';
 

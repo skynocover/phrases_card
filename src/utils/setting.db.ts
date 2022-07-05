@@ -1,30 +1,31 @@
-import { openDB, deleteDB, wrap, unwrap, IDBPObjectStore, IDBPDatabase } from 'idb';
+import { indexDB } from './index.db';
 
-const dbName = 'phrases_card';
 const settingStore = 'setting';
 
-const settingDB = await openDB(dbName, 2, {
-  upgrade(db) {
-    db.createObjectStore(settingStore);
-  },
-});
+interface settingStorageType {
+  get(key: string): Promise<any>;
+  set(key: string, val: any): Promise<IDBValidKey>;
+  del(key: string): Promise<void>;
+  clear(): Promise<void>;
+  keys(): Promise<IDBValidKey[]>;
+}
 
-const settingStorage: any = {
+const settingStorage: settingStorageType = {
   async get(key: string) {
-    return settingDB.get(settingStore, key);
+    return indexDB.get(settingStore, key);
   },
   async set(key: string, val: any) {
-    return settingDB.put(settingStore, val, key);
+    return indexDB.put(settingStore, val, key);
   },
   async del(key: string) {
-    return settingDB.delete(settingStore, key);
+    return indexDB.delete(settingStore, key);
   },
   async clear() {
-    return settingDB.clear(settingStore);
+    return indexDB.clear(settingStore);
   },
   async keys() {
-    return settingDB.getAllKeys(settingStore);
+    return indexDB.getAllKeys(settingStore);
   },
 };
 
-export { settingDB, settingStorage };
+export { settingStorage };

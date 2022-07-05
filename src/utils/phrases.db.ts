@@ -1,16 +1,6 @@
-import { openDB, deleteDB, wrap, unwrap, IDBPObjectStore, IDBPDatabase } from 'idb';
+import { indexDB } from './index.db';
 
-const dbName = 'phrases_card';
 const cardStore = 'card';
-
-const cardDB = await openDB(dbName, 2, {
-  upgrade(db) {
-    db.createObjectStore(cardStore, {
-      keyPath: 'id',
-      autoIncrement: true,
-    });
-  },
-});
 
 interface cardStorageType {
   get(key: IDBValidKey): Promise<any>;
@@ -23,23 +13,23 @@ interface cardStorageType {
 
 const cardStorage: cardStorageType = {
   async get(key: IDBValidKey) {
-    return cardDB.get(cardStore, key);
+    return indexDB.get(cardStore, key);
   },
   async add(value: any) {
-    return cardDB.add(cardStore, value);
+    return indexDB.add(cardStore, value);
   },
   async set(key: string, val: any) {
-    return cardDB.put(cardStore, val, key);
+    return indexDB.put(cardStore, val, key);
   },
   async del(key: string) {
-    return cardDB.delete(cardStore, key);
+    return indexDB.delete(cardStore, key);
   },
   async clear() {
-    return cardDB.clear(cardStore);
+    return indexDB.clear(cardStore);
   },
   async keys() {
-    return cardDB.getAllKeys(cardStore);
+    return indexDB.getAllKeys(cardStore);
   },
 };
 
-export { cardDB, cardStorage };
+export { cardStorage };

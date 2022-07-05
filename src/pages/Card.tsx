@@ -22,7 +22,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 import { translate, langs } from '../components/translate.js';
-import { cardDB, cardStorage } from '../utils/phrases.db';
+import { cardStorage } from '../utils/phrases.db';
 import axios from 'axios';
 
 import Modal from '@mui/material/Modal';
