@@ -1,32 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import TextField from '@mui/material/TextField';
-import { AppContext } from '../AppContext';
+
 import Rating from '@mui/material/Rating';
-
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
-import { styled } from '@mui/material/styles';
-import MuiGrid from '@mui/material/Grid';
-import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
-import { IconButton } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import Checkbox from '@mui/material/Checkbox';
-import ClearIcon from '@mui/icons-material/Clear';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-
-import { translate, langs } from '../components/translate.js';
-import { cardStorage } from '../utils/phrases.db';
-import axios from 'axios';
-
 import Modal from '@mui/material/Modal';
-
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -35,9 +12,11 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Slider from '@mui/material/Slider';
 import ButtonGroup from '@mui/material/ButtonGroup';
+
+import { AppContext } from '../AppContext';
+import { cardStorage } from '../utils/phrases.db';
 
 const style = {
   position: 'absolute' as 'absolute',

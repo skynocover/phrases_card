@@ -12,7 +12,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
-import { translate, langs } from '../components/translate.js';
+import { translate, langs } from '../utils/translate.js';
 import { cardStorage } from '../utils/phrases.db';
 import { settingStorage } from '../utils/setting.db';
 import { LanguageSelect } from '../components/LanguageSelect';
@@ -24,7 +24,7 @@ export default function Home() {
   const textInput = React.useRef(null);
 
   const [from, setFrom] = React.useState<string>('auto');
-  const [detectFrom, setDetextFrom] = React.useState<string>('');
+  const [detectFrom, setDetectFrom] = React.useState<string>('');
   const [fromExpand, setFromExpand] = React.useState<boolean>(false);
 
   const [to, setTo] = React.useState<string>('zh-TW');
@@ -69,7 +69,7 @@ export default function Home() {
   const setTranslate = async (input: string) => {
     const { lang, text } = await translate(input, from, to);
     setContent(text ? text.join('') : '');
-    setDetextFrom(lang);
+    setDetectFrom(lang);
   };
 
   const newCard = async () => {

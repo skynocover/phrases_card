@@ -13,10 +13,8 @@ import Card from './pages/Card';
 import Header from './components/Header';
 import { Paper } from '@mui/material';
 
-import Button from '@mui/material/Button';
-
 const NotFound = () => {
-  return <div>你来到了没有知识的荒原</div>;
+  return <div>This is wrong way</div>;
 };
 
 const darkTheme = createTheme({

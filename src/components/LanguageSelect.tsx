@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 
-import { langs } from '../components/translate.js';
+import { langs } from '../utils/translate.js';
 
 const LanguageSelect = ({
   expand,
