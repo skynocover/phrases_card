@@ -10,6 +10,7 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
+import { cardStorage } from '../utils/phrases.db';
 
 import { Routes, Route, Link } from 'react-router-dom';
 
@@ -33,6 +34,18 @@ const ResponsiveAppBar = () => {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  // 測試用單字自動填入
+  const setTest = async () => {
+    await cardStorage.add({ origin: 'Apple', translate: '蘋果', sentence: 'This is an apple' });
+    await cardStorage.add({ origin: 'Banana', translate: '香蕉', sentence: 'This is an banana' });
+    await cardStorage.add({ origin: 'Dog', translate: '狗', sentence: 'This is an dog' });
+    await cardStorage.add({ origin: 'Date', translate: '約會', sentence: 'This is a Date' });
+  };
+
+  const clearAll = async () => {
+    await cardStorage.clear();
   };
 
   return (
@@ -138,11 +151,19 @@ const ResponsiveAppBar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <>
+                {settings.map((setting) => (
+                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </>
+              <MenuItem onClick={setTest}>
+                <Typography textAlign="center">Test</Typography>
+              </MenuItem>
+              <MenuItem onClick={clearAll}>
+                <Typography textAlign="center">ClearAll</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
