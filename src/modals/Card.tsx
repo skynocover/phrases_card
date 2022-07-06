@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Rating from '@mui/material/Rating';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
@@ -10,6 +10,7 @@ import Slider from '@mui/material/Slider';
 import ButtonGroup from '@mui/material/ButtonGroup';
 
 import { AppContext } from '../AppContext';
+import Divider from '../components/Divider';
 import { cardStorage } from '../utils/phrases.db';
 
 export interface cardType {
@@ -27,11 +28,13 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 800,
-  bgcolor: 'background.paper',
+  backgroundColor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
   color: 'white',
+  // minHeight: 600,
+  height: 600,
 };
 
 export default function Card({
@@ -105,49 +108,55 @@ export default function Card({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Slider
-            marks
-            max={cards.length - 1}
-            value={index}
-            /* @ts-ignore */
-            onChange={(e) => setIndex(e.target.value)}
-            aria-label="Disabled slider"
-          />
-          <div className="flex flex-col items-center justify-center h-60">
-            {cards.length > 0 && <Typography variant="h4">{cards[index].origin}</Typography>}
-            {cards.length > 0 && <Typography variant="h4">{cards[index].sentence}</Typography>}
+          <div className="grid content-between h-full grid-cols-1">
+            <Slider
+              marks
+              max={cards.length - 1}
+              value={index}
+              /* @ts-ignore */
+              onChange={(e) => setIndex(e.target.value)}
+              aria-label="Disabled slider"
+            />
 
-            {answer && (
-              <>
-                <div
-                  className="my-2"
-                  style={{
-                    width: '100%',
-                    borderWidth: 0.1,
-                    borderStyle: 'solid',
-                    borderColor: 'white',
-                  }}
-                />
-                <Typography variant="h4">{cards[index].translate}</Typography>
-              </>
+            <div className="flex flex-col items-center ">
+              {cards.length > 0 && <Typography variant="h4">{cards[index].sentence}</Typography>}
+              {cards.length > 0 && <Typography variant="h4">{cards[index].origin}</Typography>}
+
+              {answer && (
+                <>
+                  <Divider />
+                  <Typography variant="h4">{cards[index].translate}</Typography>
+                  {cards[index].comment && (
+                    <TextField
+                      variant="filled"
+                      label="comment"
+                      margin="normal"
+                      style={{ width: '75%' }}
+                      value={cards[index].comment}
+                      disabled={true}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+
+            {answer ? (
+              <div className="flex justify-center">
+                <ButtonGroup color="primary">
+                  <Button>1</Button>
+                  <Button>2</Button>
+                  <Button>3</Button>
+                  <Button>4</Button>
+                </ButtonGroup>
+              </div>
+            ) : (
+              <div className="flex justify-center ">
+                <Button variant="outlined" onClick={() => next('Enter')}>
+                  Check Answer
+                </Button>
+              </div>
             )}
           </div>
-          {answer ? (
-            <div className="flex justify-center">
-              <ButtonGroup color="primary">
-                <Button>1</Button>
-                <Button>2</Button>
-                <Button>3</Button>
-                <Button>4</Button>
-              </ButtonGroup>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <ButtonGroup color="primary">
-                <Button onClick={() => next('Enter')}>Check Answer </Button>
-              </ButtonGroup>
-            </div>
-          )}
         </Box>
       </Modal>
     </div>

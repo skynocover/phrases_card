@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { AppContext } from '../AppContext';
 
@@ -11,24 +10,24 @@ import { IconButton } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 
 import { translate, langs } from '../utils/translate.js';
-import { cardStorage } from '../utils/phrases.db';
 import { settingStorage } from '../utils/setting.db';
 import { LanguageSelect } from '../components/LanguageSelect';
+import NewCard from '../modals/NewCard';
 import { speak } from '../utils/speak';
 
 export default function Home() {
   const appCtx = React.useContext(AppContext);
+
+  // 原文
+  const [text, setText] = React.useState<string>('');
+  // 翻譯
   const [content, setContent] = React.useState<string>('');
-  const textInput = React.useRef(null);
 
   const [from, setFrom] = React.useState<string>('auto');
   // 偵測語言
-  const [detectFrom, setDetectFrom] = React.useState<string>('');
+  const [detectFrom, setDetectFrom] = React.useState<string>();
   const [fromExpand, setFromExpand] = React.useState<boolean>(false);
 
   const [to, setTo] = React.useState<string>('zh-TW');
@@ -39,7 +38,6 @@ export default function Home() {
   const [autoSpeech, setAutoSpeech] = React.useState<boolean>(false);
 
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-  const [comment, setComment] = React.useState<string>('');
 
   const getSelected = async () => {
     const temp = window.getSelection();
@@ -75,43 +73,27 @@ export default function Home() {
     init();
   }, []);
 
-  const setTranslate = async (input: string) => {
-    const { lang, text } = await translate(input, from, to);
-    setContent(text ? text.join('') : '');
-    setDetectFrom(lang);
-  };
-
-  const newCard = async () => {
-    const temp = {
-      origin: hightLightText,
-      translate: selectedWord,
-      /* @ts-ignore */
-      sentence: textInput.current.value,
-      comment,
-    };
-    await cardStorage.add(temp);
-    setModalOpen(false);
-  };
-
-  const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 600,
-    backgroundColor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-    color: 'white',
-  };
+  React.useEffect(() => {
+    translate(text, from, to).then(({ lang, text }) => {
+      setContent(text ? text.join('') : '');
+      console.log({ lang, text });
+      setDetectFrom(lang);
+    });
+  }, [text]);
 
   return (
     <>
+      <NewCard
+        modalOpen={modalOpen}
+        closeModal={() => setModalOpen(false)}
+        origin={hightLightText}
+        translate={selectedWord}
+        sentence={text}
+      />
       <div className="flex mt-2">
         <TextField
           value={selectedWord}
-          label={!!selectedWord ? '' : 'Highlight Text'}
+          label={!!selectedWord ? '' : 'Highlight Some Text'}
           variant="outlined"
           disabled={true}
         />
@@ -139,18 +121,13 @@ export default function Home() {
                     color="primary"
                     onClick={() => {
                       setContent('');
-                      /* @ts-ignore */
-                      textInput.current.value = '';
+                      setText('');
                       setSelectedWord('');
                     }}
                   >
                     <ClearIcon />
                   </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    /* @ts-ignore */
-                    onClick={() => speak(textInput.current.value, from)}
-                  >
+                  <IconButton aria-label="delete" onClick={() => speak(text, from)}>
                     <VolumeUpIcon />
                   </IconButton>
                 </>
@@ -160,11 +137,11 @@ export default function Home() {
             <TextField
               id="filled-multiline-static"
               /* @ts-ignore */
-              label={detectFrom && detectFrom !== from && 'Detect: ' + langs[detectFrom]}
+              label={from === 'auto' && langs[detectFrom] && 'Detect: ' + langs[detectFrom]}
               multiline
               variant="filled"
-              onChange={(e) => setTranslate(e.target.value)}
-              inputRef={textInput}
+              onChange={(e) => setText(e.target.value)}
+              value={text}
               onMouseUp={getSelected}
               fullWidth
             />
@@ -194,29 +171,6 @@ export default function Home() {
           </div>
         </Grid>
       </Grid>
-
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography variant="h6">Origin: {hightLightText}</Typography>
-          <div className="flex flex-col item-center justify-center">
-            <Typography variant="h6">Translate: {selectedWord}</Typography>
-            {/* @ts-ignore */}
-            <Typography variant="h6">Sentence: {textInput.current?.value}</Typography>
-
-            <TextField
-              label="comment"
-              variant="standard"
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <Button onClick={newCard}>Confirm</Button>
-          </div>
-        </Box>
-      </Modal>
     </>
   );
 }

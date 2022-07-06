@@ -22,13 +22,16 @@ import { AppContext } from '../AppContext';
 import { cardStorage } from '../utils/phrases.db';
 import Card, { cardType } from '../modals/Card';
 import DeleteCard from '../modals/DeleteCard';
+import EditCard from '../modals/EditCard';
 
+// 區分不同語言庫
 export default function Home() {
   const appCtx = React.useContext(AppContext);
   const [cards, setCards] = React.useState<cardType[]>([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
 
   const [currentCard, setCurrentCard] = React.useState<cardType>();
+  const [editedCard, setEditedCard] = React.useState<cardType>();
 
   const init = async () => {
     try {
@@ -48,10 +51,6 @@ export default function Home() {
     init();
   }, []);
 
-  const closeDeleteModal = () => {
-    setCurrentCard(undefined);
-  };
-
   return (
     <>
       <div className="flex mt-2 mr-2">
@@ -63,7 +62,22 @@ export default function Home() {
 
       <Card cards={cards} open={openModal} closeModal={() => setOpenModal(false)} refresh={init} />
 
-      <DeleteCard card={currentCard} refresh={init} closeModal={closeDeleteModal} />
+      <DeleteCard
+        card={currentCard}
+        refresh={() => {
+          init();
+          setCurrentCard(undefined);
+        }}
+        closeModal={() => setCurrentCard(undefined)}
+      />
+      <EditCard
+        card={editedCard}
+        refresh={() => {
+          init();
+          setEditedCard(undefined);
+        }}
+        closeModal={() => setEditedCard(undefined)}
+      />
 
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
@@ -77,8 +91,10 @@ export default function Home() {
               </TableCell>
               <TableCell align="left">sentence</TableCell>
               <TableCell align="left">comment</TableCell>
-              <TableCell align="center">star</TableCell>
-              <TableCell align="center"></TableCell>
+              <TableCell style={{ width: 150 }} align="center">
+                star
+              </TableCell>
+              <TableCell style={{ width: 200 }} align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -95,14 +111,8 @@ export default function Home() {
                 </TableCell>
                 <TableCell align="center">
                   <>
-                    <Button>Edit</Button>
-                    <Button
-                      onClick={() => {
-                        setCurrentCard(card);
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <Button onClick={() => setEditedCard(card)}>Edit</Button>
+                    <Button onClick={() => setCurrentCard(card)}>Delete</Button>
                   </>
                 </TableCell>
               </TableRow>
