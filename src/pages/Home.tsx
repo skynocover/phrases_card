@@ -89,6 +89,8 @@ export default function Home() {
         origin={hightLightText}
         translate={selectedWord}
         sentence={text}
+        from={detectFrom || from}
+        to={to}
       />
       <div className="flex mt-2">
         <TextField

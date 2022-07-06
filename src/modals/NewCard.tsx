@@ -30,12 +30,16 @@ export default function Index({
   origin,
   translate,
   sentence,
+  from,
+  to,
 }: {
   modalOpen: boolean;
   closeModal: Function;
   origin: string;
   translate: string;
   sentence: string;
+  from: string;
+  to: string;
 }) {
   const [newTranslate, setTranslate] = React.useState<string>('');
   const [comment, setComment] = React.useState<string>('');
@@ -50,6 +54,8 @@ export default function Index({
       translate,
       sentence,
       comment,
+      from,
+      to,
     };
     await cardStorage.add(temp);
     closeModal();

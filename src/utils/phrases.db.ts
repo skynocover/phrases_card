@@ -9,6 +9,7 @@ interface cardStorageType {
   del(key: number): Promise<void>;
   clear(): Promise<void>;
   keys(): Promise<IDBValidKey[]>;
+  queryAll(index: string, input: string, count?: number): Promise<any>;
 }
 
 const cardStorage: cardStorageType = {
@@ -29,6 +30,9 @@ const cardStorage: cardStorageType = {
   },
   async keys() {
     return indexDB.getAllKeys(cardStore);
+  },
+  async queryAll(index: string, input: string, count?: number) {
+    return indexDB.transaction(cardStore).store.index(index).getAll(input, count);
   },
 };
 

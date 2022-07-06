@@ -17,6 +17,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
+import TablePagination from '@mui/material/TablePagination';
 
 import { AppContext } from '../AppContext';
 import { cardStorage } from '../utils/phrases.db';
@@ -27,21 +28,34 @@ import EditCard from '../modals/EditCard';
 // 區分不同語言庫
 export default function Home() {
   const appCtx = React.useContext(AppContext);
+
+  const pageSize = 5;
+
+  const [count, setCount] = React.useState<number>(0);
+  const [page, setPage] = React.useState<number>(0);
+
   const [cards, setCards] = React.useState<cardType[]>([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
 
   const [currentCard, setCurrentCard] = React.useState<cardType>();
   const [editedCard, setEditedCard] = React.useState<cardType>();
 
-  const init = async () => {
+  const init = async (_page = page) => {
+    const temp = await cardStorage.queryAll('from', 'en', 6);
+    console.log({ temp });
     try {
       const keys = await cardStorage.keys();
-      let cards: any[] = [];
-      for (const key of keys) {
-        const v = await cardStorage.get(key);
+      setCount(keys.length);
+      let cards: cardType[] = [];
+      let end = _page * pageSize + pageSize;
+      if (end > keys.length) end = keys.length;
+
+      for (let i = _page * pageSize; i < end; i++) {
+        const v = await cardStorage.get(keys[i]);
         cards.push(v);
       }
       setCards(cards);
+      setPage(_page);
     } catch (error: any) {
       console.log(error.message);
     }
@@ -120,6 +134,14 @@ export default function Home() {
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={count}
+        rowsPerPage={pageSize}
+        rowsPerPageOptions={[pageSize]}
+        page={page}
+        onPageChange={(e, p) => init(p)}
+      />
     </>
   );
 }

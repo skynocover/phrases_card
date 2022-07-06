@@ -7,10 +7,15 @@ const settingStore = 'setting';
 
 const indexDB = await openDB(dbName, 1, {
   upgrade(db) {
-    db.createObjectStore(cardStore, {
+    const cardTable = db.createObjectStore(cardStore, {
       keyPath: 'id',
       autoIncrement: true,
     });
+    cardTable.createIndex('from', 'from');
+    cardTable.createIndex('to', 'to');
+    cardTable.createIndex('origin', 'origin');
+    cardTable.createIndex('translate', 'translate');
+    cardTable.createIndex('star', 'star');
     db.createObjectStore(settingStore);
   },
 });
