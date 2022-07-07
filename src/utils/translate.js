@@ -331,7 +331,7 @@ async function translate(text, from, to) {
 
   cache.put(key, { lang: data[2], text: data[0]?.map((item) => item[0]) }, 1000 * 60 * 60);
 
-  return { lang: data[8] ? data[8][3] : data[2], text: data[0]?.map((item) => item[0]) };
+  return { lang: data[8] ? data[8][3][0] : data[2], text: data[0]?.map((item) => item[0]) };
 }
 
 export { translate, langs };

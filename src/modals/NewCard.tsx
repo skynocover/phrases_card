@@ -6,8 +6,9 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import Divider from '../components/Divider';
+import { settingStorage } from '../utils/setting.db';
 import { cardStorage } from '../utils/phrases.db';
+import Divider from '../components/Divider';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -24,22 +25,21 @@ const style = {
   color: 'white',
 };
 
+// 太長會跑版
 export default function Index({
   modalOpen,
   closeModal,
   origin,
   translate,
+  detectFrom,
   sentence,
-  from,
-  to,
 }: {
   modalOpen: boolean;
   closeModal: Function;
   origin: string;
   translate: string;
   sentence: string;
-  from: string;
-  to: string;
+  detectFrom?: string;
 }) {
   const [newTranslate, setTranslate] = React.useState<string>('');
   const [comment, setComment] = React.useState<string>('');
@@ -49,6 +49,8 @@ export default function Index({
   }, [translate]);
 
   const newCard = async () => {
+    const from = detectFrom || (await settingStorage.get('from')) || 'auto';
+    const to = (await settingStorage.get('to')) || 'en';
     const temp = {
       origin,
       translate,

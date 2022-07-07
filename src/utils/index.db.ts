@@ -13,6 +13,7 @@ const indexDB = await openDB(dbName, 1, {
     });
     cardTable.createIndex('from', 'from');
     cardTable.createIndex('to', 'to');
+    cardTable.createIndex('language', ['from', 'to']);
     cardTable.createIndex('origin', 'origin');
     cardTable.createIndex('translate', 'translate');
     cardTable.createIndex('star', 'star');

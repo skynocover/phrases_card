@@ -24,14 +24,9 @@ export default function Home() {
   const [text, setText] = React.useState<string>('');
   // 翻譯
   const [content, setContent] = React.useState<string>('');
-
-  const [from, setFrom] = React.useState<string>('auto');
   // 偵測語言
   const [detectFrom, setDetectFrom] = React.useState<string>();
-  const [fromExpand, setFromExpand] = React.useState<boolean>(false);
-
-  const [to, setTo] = React.useState<string>('zh-TW');
-  const [toExpand, setToExpand] = React.useState<boolean>(false);
+  const [detectLabel, setDetectLabel] = React.useState<string>();
 
   const [hightLightText, setHightLightText] = React.useState<string>('');
   const [selectedWord, setSelectedWord] = React.useState<string>('');
@@ -40,6 +35,10 @@ export default function Home() {
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
 
   const getSelected = async () => {
+    const from = (await settingStorage.get('from')) || 'auto';
+    const to = (await settingStorage.get('to')) || 'en';
+    const autoSpeechSetting = (await settingStorage.get('autoSpeech')) || false;
+
     const temp = window.getSelection();
     if (temp) {
       const selectText = temp.toString();
@@ -47,39 +46,40 @@ export default function Home() {
         setHightLightText(selectText);
         const { text } = await translate(selectText, from, to);
         setSelectedWord(text.join(''));
-        if (autoSpeech) {
+        if (autoSpeechSetting) {
           speak(selectText, from);
         }
       }
     }
   };
 
-  const init = async () => {
-    try {
-      const from = await settingStorage.get('from');
-      if (from) {
-        setFrom(from);
-      }
-      const to = await settingStorage.get('to');
-      if (to) {
-        setTo(to);
-      }
-    } catch (error: any) {
-      console.log(error.message);
+  const getTranslate = async () => {
+    const from = (await settingStorage.get('from')) || 'auto';
+    const to = (await settingStorage.get('to')) || 'en';
+    const autoSpeechSetting = (await settingStorage.get('autoSpeech')) || false;
+
+    const { lang, text: textRes } = await translate(text, from, to);
+
+    setContent(text ? textRes.join('') : '');
+    setDetectFrom(lang);
+    /* @ts-ignore */
+    const temp = langs[lang];
+    if (from === 'auto' && temp) {
+      setDetectLabel('Detect: ' + temp);
+    } else {
+      setDetectLabel(undefined);
     }
+    setAutoSpeech(autoSpeechSetting);
   };
 
   React.useEffect(() => {
-    init();
-  }, []);
-
-  React.useEffect(() => {
-    translate(text, from, to).then(({ lang, text }) => {
-      setContent(text ? text.join('') : '');
-      console.log({ lang, text });
-      setDetectFrom(lang);
-    });
+    getTranslate();
   }, [text]);
+
+  const Speak = async () => {
+    const from = (await settingStorage.get('from')) || 'auto';
+    speak(text, from);
+  };
 
   return (
     <>
@@ -89,8 +89,7 @@ export default function Home() {
         origin={hightLightText}
         translate={selectedWord}
         sentence={text}
-        from={detectFrom || from}
-        to={to}
+        detectFrom={detectFrom}
       />
       <div className="flex mt-2">
         <TextField
@@ -99,7 +98,13 @@ export default function Home() {
           variant="outlined"
           disabled={true}
         />
-        <IconButton aria-label="delete" onClick={() => setAutoSpeech(!autoSpeech)}>
+        <IconButton
+          aria-label="delete"
+          onClick={async () => {
+            await settingStorage.set('autoSpeech', !autoSpeech);
+            setAutoSpeech(!autoSpeech);
+          }}
+        >
           {autoSpeech ? <VolumeUpIcon /> : <VolumeOffIcon />}
         </IconButton>
         <Button variant="contained" onClick={() => selectedWord && setModalOpen(true)}>
@@ -109,37 +114,27 @@ export default function Home() {
       <Grid container>
         <Grid item xs>
           <div className="flex-col justify-center m-2">
-            <div className="flex justify-center">
-              <LanguageSelect
-                expand={fromExpand}
-                setExpand={setFromExpand}
-                selected={from}
-                setChoose={setFrom}
-                setSettingStorage={(input: string) => settingStorage.set('from', input)}
-              />
-              {!fromExpand && (
-                <>
-                  <IconButton
-                    color="primary"
-                    onClick={() => {
-                      setContent('');
-                      setText('');
-                      setSelectedWord('');
-                    }}
-                  >
-                    <ClearIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete" onClick={() => speak(text, from)}>
-                    <VolumeUpIcon />
-                  </IconButton>
-                </>
-              )}
+            <div className="flex">
+              <LanguageSelect settingName="from" />
+
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  setContent('');
+                  setText('');
+                  setSelectedWord('');
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
+              <IconButton aria-label="delete" onClick={Speak}>
+                <VolumeUpIcon />
+              </IconButton>
             </div>
 
             <TextField
               id="filled-multiline-static"
-              /* @ts-ignore */
-              label={from === 'auto' && langs[detectFrom] && 'Detect: ' + langs[detectFrom]}
+              label={detectLabel}
               multiline
               variant="filled"
               onChange={(e) => setText(e.target.value)}
@@ -152,24 +147,8 @@ export default function Home() {
         <Divider orientation="vertical" flexItem />
         <Grid item xs>
           <div className="flex-col justify-center m-2">
-            <LanguageSelect
-              expand={toExpand}
-              setExpand={setToExpand}
-              selected={to}
-              setChoose={setTo}
-              setSettingStorage={(input: string) => settingStorage.set('to', input)}
-              forbiddenAuto
-            />
-            <TextField
-              id="filled-multiline-static"
-              disabled
-              // label="Multiline"
-              multiline
-              // rows={8}
-              // variant="filled"
-              value={content}
-              fullWidth
-            />
+            <LanguageSelect settingName="to" forbiddenAuto />
+            <TextField id="filled-multiline-static" disabled multiline value={content} fullWidth />
           </div>
         </Grid>
       </Grid>

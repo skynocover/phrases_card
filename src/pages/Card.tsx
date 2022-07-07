@@ -1,9 +1,7 @@
 import React from 'react';
 
 import Rating from '@mui/material/Rating';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Modal from '@mui/material/Modal';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,40 +9,48 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
-import Slider from '@mui/material/Slider';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
 import TablePagination from '@mui/material/TablePagination';
 
 import { AppContext } from '../AppContext';
 import { cardStorage } from '../utils/phrases.db';
+import { settingStorage } from '../utils/setting.db';
 import Card, { cardType } from '../modals/Card';
 import DeleteCard from '../modals/DeleteCard';
 import EditCard from '../modals/EditCard';
+import EditCardReview from '../modals/EditCardReview';
+import CardLanguageSelect from '../components/CardLanguageSelect';
 
 // 區分不同語言庫
 export default function Home() {
   const appCtx = React.useContext(AppContext);
 
-  const pageSize = 5;
+  const pageSize = 10;
 
   const [count, setCount] = React.useState<number>(0);
   const [page, setPage] = React.useState<number>(0);
 
   const [cards, setCards] = React.useState<cardType[]>([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
+  const [openReviewSetting, setOpenReviewSetting] = React.useState<boolean>(true);
 
   const [currentCard, setCurrentCard] = React.useState<cardType>();
   const [editedCard, setEditedCard] = React.useState<cardType>();
 
+  const [fromLanguage, setFromLanguage] = React.useState<string[]>([]);
+  const [toLanguage, setToLanguage] = React.useState<string[]>([]);
+
   const init = async (_page = page) => {
-    const temp = await cardStorage.queryAll('from', 'en', 6);
-    console.log({ temp });
     try {
-      const keys = await cardStorage.keys();
+      const from = await cardStorage.allLanguages('from');
+      setFromLanguage(from);
+      const to = await cardStorage.allLanguages('to');
+      setToLanguage(to);
+
+      const keys = await cardStorage.queryKeys(
+        await settingStorage.get('cardFrom'),
+        await settingStorage.get('to'),
+      );
+
       setCount(keys.length);
       let cards: cardType[] = [];
       let end = _page * pageSize + pageSize;
@@ -54,7 +60,7 @@ export default function Home() {
         const v = await cardStorage.get(keys[i]);
         cards.push(v);
       }
-      setCards(cards);
+      setCards([...cards]);
       setPage(_page);
     } catch (error: any) {
       console.log(error.message);
@@ -68,9 +74,22 @@ export default function Home() {
   return (
     <>
       <div className="flex mt-2 mr-2">
+        <div className="grid grid-cols-2 ">
+          <CardLanguageSelect settingName="cardFrom" onlyLanguage={fromLanguage} />
+          <CardLanguageSelect settingName="to" onlyLanguage={toLanguage} />
+        </div>
         <div className="flex-1"></div>
+
+        <Button variant="contained" onClick={() => init()}>
+          Filter
+        </Button>
+        <div className="ml-2" />
         <Button variant="contained" onClick={() => setOpenModal(true)}>
           Review
+        </Button>
+        <div className="ml-2" />
+        <Button variant="outlined" onClick={() => setOpenReviewSetting(true)}>
+          Review Setting
         </Button>
       </div>
 
@@ -92,6 +111,8 @@ export default function Home() {
         }}
         closeModal={() => setEditedCard(undefined)}
       />
+
+      <EditCardReview open={openReviewSetting} closeModal={() => setOpenReviewSetting(false)} />
 
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
