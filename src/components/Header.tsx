@@ -10,7 +10,7 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import { cardStorage } from '../utils/phrases.db';
+import { db } from '../utils/index.db';
 
 import { Routes, Route, Link } from 'react-router-dom';
 
@@ -38,15 +38,82 @@ const ResponsiveAppBar = () => {
 
   // 測試用單字自動填入
   const setTest = async () => {
-    await cardStorage.add({ origin: 'Apple', translate: '蘋果', sentence: 'This is an apple' });
-    await cardStorage.add({ origin: 'Banana', translate: '香蕉', sentence: 'This is an banana' });
-    await cardStorage.add({ origin: 'Dog', translate: '狗', sentence: 'This is an dog' });
-    await cardStorage.add({ origin: 'Date', translate: '約會', sentence: 'This is a Date' });
+    await db.cards.add({
+      origin: 'Apple',
+      translate: '蘋果',
+      sentence: 'This is an apple',
+      comment: 'This is comment',
+      from: 'en',
+      to: 'zh-TW',
+      star: 0,
+    });
+    await db.cards.add({
+      origin: 'Banana',
+      translate: '香蕉',
+      sentence: 'This is an banana',
+      comment: 'Comment 2 ',
+      from: 'en',
+      to: 'zh-TW',
+      star: 1,
+    });
+    await db.cards.add({
+      origin: 'Dog',
+      translate: '狗',
+      sentence: 'This is an dog',
+      comment: 'Dog not to use this',
+      from: 'en',
+      to: 'zh-TW',
+      star: 2,
+    });
+
+    await db.cards.add({
+      origin: 'Cat',
+      translate: '貓',
+      sentence: 'This is an cat',
+      from: 'en',
+      to: 'zh-TW',
+      star: 3,
+    });
+
+    await db.cards.add({
+      origin: 'Pet',
+      translate: '寵物',
+      sentence: 'This is my pet',
+      comment: 'this is another comment',
+      from: 'en',
+      to: 'zh-TW',
+      star: 4,
+    });
+
+    await db.cards.add({
+      origin: 'そのスケジュール',
+      translate: '嘗試',
+      sentence: 'try no to do this',
+      from: 'ja',
+      to: 'zh-TW',
+      star: 3,
+    });
+
+    await db.cards.add({
+      origin: '決まりし',
+      translate: '可以',
+      sentence: '決まりし',
+      from: 'ja',
+      to: 'zh-TW',
+      star: 1,
+    });
   };
 
-  const clearAll = async () => {
-    await cardStorage.clear();
-  };
+  React.useEffect(() => {
+    /** @ts-ignore */
+    window.setTest = function () {
+      setTest();
+    };
+    /** @ts-ignore */
+    window.clearAll = function () {
+      db.cards.clear();
+    };
+  }, []);
 
   return (
     <AppBar position="static">
@@ -56,11 +123,9 @@ const ResponsiveAppBar = () => {
             <Typography
               variant="h6"
               noWrap
-              //   component="a"
-              // href="/"
               sx={{
                 mr: 2,
-                display: { xs: 'none', md: 'flex' },
+                display: 'flex',
                 fontFamily: 'monospace',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
@@ -68,56 +133,13 @@ const ResponsiveAppBar = () => {
                 textDecoration: 'none',
               }}
             >
-              LOGO
+              Home
             </Typography>
           </Link>
 
           <div className="flex flex-grow md:hidden"></div>
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            LOGO
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+
+          <Box sx={{ flexGrow: 1, display: 'flex' }}>
             {pages.map((page) => (
               <Button
                 key={page}
@@ -129,7 +151,7 @@ const ResponsiveAppBar = () => {
             ))}
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          {/* <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -151,21 +173,13 @@ const ResponsiveAppBar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <>
-                {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting}</Typography>
-                  </MenuItem>
-                ))}
-              </>
-              <MenuItem onClick={setTest}>
-                <Typography textAlign="center">Test</Typography>
-              </MenuItem>
-              <MenuItem onClick={clearAll}>
-                <Typography textAlign="center">ClearAll</Typography>
-              </MenuItem>
+              {settings.map((setting) => (
+                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <Typography textAlign="center">{setting}</Typography>
+                </MenuItem>
+              ))}
             </Menu>
-          </Box>
+          </Box> */}
         </Toolbar>
       </Container>
     </AppBar>
