@@ -3,8 +3,7 @@ import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
-import { cardStorage } from '../utils/phrases.db';
-import { cardType } from './Card';
+import { db, Card } from '../utils/index.db';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -12,26 +11,18 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 800,
-  bgcolor: 'background.paper',
+  backgroundColor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
   color: 'white',
 };
 
-export default function Index({
-  card,
-  closeModal,
-  refresh,
-}: {
-  card: cardType | undefined;
-  closeModal: any;
-  refresh: Function;
-}) {
+export default function Index({ card, closeModal }: { card: Card | undefined; closeModal: any }) {
   const delCard = async () => {
     if (card) {
-      await cardStorage.del(card.id);
-      refresh();
+      await db.cards.delete(card.id || 0);
+      closeModal();
     }
   };
 
@@ -44,7 +35,6 @@ export default function Index({
     >
       <Box sx={style}>
         <div className="flex flex-col items-center justify-center h-60">
-          {/* <Typography variant="h3">Delete This Card ?</Typography> */}
           <Typography variant="h4">{card?.origin}</Typography>
           <Typography variant="h4">{card?.translate}</Typography>
         </div>

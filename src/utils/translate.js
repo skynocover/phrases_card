@@ -111,6 +111,8 @@ const langs = {
   zu: 'Zulu',
 };
 
+export const languages = Object.keys(langs);
+
 function getCode(desiredLang) {
   if (!desiredLang) {
     return false;

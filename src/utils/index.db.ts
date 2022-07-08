@@ -1,24 +1,44 @@
-import { openDB, deleteDB, wrap, unwrap, IDBPObjectStore, IDBPDatabase } from 'idb';
+import Dexie, { Table } from 'dexie';
 
-const dbName = 'phrases_card';
+export interface Card {
+  id?: number;
+  origin: string;
+  translate: string;
+  sentence: string;
+  comment?: string;
+  star: number;
 
-const cardStore = 'card';
-const settingStore = 'setting';
+  from: string;
+  to: string;
+}
 
-const indexDB = await openDB(dbName, 1, {
-  upgrade(db) {
-    const cardTable = db.createObjectStore(cardStore, {
-      keyPath: 'id',
-      autoIncrement: true,
+export interface Setting {
+  homeTranslate: translateSetting;
+  cardTranslate: translateSetting;
+  review: reviewSetting;
+  homeAutoSpeech: boolean;
+}
+
+interface translateSetting {
+  from: string;
+  to: string;
+}
+
+interface reviewSetting {
+  probability: number[];
+  reviewNumber: number;
+}
+
+class PhraseCards extends Dexie {
+  public cards!: Table<Card, number>;
+  public setting!: Table<Setting>;
+  public constructor() {
+    super('phrase_cards');
+    this.version(1).stores({
+      cards: '++id,from,to,star',
+      setting: '++id,homeTranslate,cardTranslate,review',
     });
-    cardTable.createIndex('from', 'from');
-    cardTable.createIndex('to', 'to');
-    cardTable.createIndex('language', ['from', 'to']);
-    cardTable.createIndex('origin', 'origin');
-    cardTable.createIndex('translate', 'translate');
-    cardTable.createIndex('star', 'star');
-    db.createObjectStore(settingStore);
-  },
-});
+  }
+}
 
-export { indexDB };
+export const db = new PhraseCards();

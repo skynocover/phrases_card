@@ -12,105 +12,94 @@ import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 
 import { AppContext } from '../AppContext';
-import { cardStorage } from '../utils/phrases.db';
-import { settingStorage } from '../utils/setting.db';
-import Card, { cardType } from '../modals/Card';
+import ShowCard from '../modals/ShowCard';
 import DeleteCard from '../modals/DeleteCard';
 import EditCard from '../modals/EditCard';
 import EditCardReview from '../modals/EditCardReview';
 import CardLanguageSelect from '../components/CardLanguageSelect';
 
-// 區分不同語言庫
+import { languages } from '../utils/translate.js';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db, Card } from '../utils/index.db';
+
 export default function Home() {
   const appCtx = React.useContext(AppContext);
 
   const pageSize = 10;
-
-  const [count, setCount] = React.useState<number>(0);
   const [page, setPage] = React.useState<number>(0);
 
-  const [cards, setCards] = React.useState<cardType[]>([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
-  const [openReviewSetting, setOpenReviewSetting] = React.useState<boolean>(true);
+  const [openReviewSetting, setOpenReviewSetting] = React.useState<boolean>(false);
 
-  const [currentCard, setCurrentCard] = React.useState<cardType>();
-  const [editedCard, setEditedCard] = React.useState<cardType>();
+  const [currentCard, setCurrentCard] = React.useState<Card>();
+  const [editedCard, setEditedCard] = React.useState<Card>();
 
-  const [fromLanguage, setFromLanguage] = React.useState<string[]>([]);
-  const [toLanguage, setToLanguage] = React.useState<string[]>([]);
+  const setting = useLiveQuery(() => db.setting.get(1));
 
-  const init = async (_page = page) => {
-    try {
-      const from = await cardStorage.allLanguages('from');
-      setFromLanguage(from);
-      const to = await cardStorage.allLanguages('to');
-      setToLanguage(to);
+  const cards = useLiveQuery(
+    () =>
+      db.cards
+        .where('star')
+        .between(0, 4, true, true)
+        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
+        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .offset(page * pageSize)
+        .limit(pageSize)
+        .sortBy('star'),
+    [page, setting],
+  );
 
-      const keys = await cardStorage.queryKeys(
-        await settingStorage.get('cardFrom'),
-        await settingStorage.get('to'),
-      );
+  const count = useLiveQuery(
+    () =>
+      db.cards
+        .where('star')
+        .between(0, 4, true, true)
+        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
+        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .count(),
+    [setting],
+  );
 
-      setCount(keys.length);
-      let cards: cardType[] = [];
-      let end = _page * pageSize + pageSize;
-      if (end > keys.length) end = keys.length;
+  const fromLanguage = useLiveQuery(async () => {
+    const temp = languages.map(
+      async (item) => (await db.cards.where('from').equals(item).count()) > 0,
+    );
+    const booleans = await Promise.all(temp);
 
-      for (let i = _page * pageSize; i < end; i++) {
-        const v = await cardStorage.get(keys[i]);
-        cards.push(v);
-      }
-      setCards([...cards]);
-      setPage(_page);
-    } catch (error: any) {
-      console.log(error.message);
-    }
-  };
+    return languages.filter((_, i) => booleans[i]);
+  });
 
-  React.useEffect(() => {
-    init();
-  }, []);
+  const toLanguage = useLiveQuery(async () => {
+    const temp = languages.map(
+      async (item) => (await db.cards.where('to').equals(item).count()) > 0,
+    );
+    const booleans = await Promise.all(temp);
+
+    return languages.filter((_, i) => booleans[i]);
+  });
 
   return (
     <>
-      <div className="flex mt-2 mr-2">
+      <div className="flex items-start mt-2 mr-2">
         <div className="grid grid-cols-2 ">
-          <CardLanguageSelect settingName="cardFrom" onlyLanguage={fromLanguage} />
-          <CardLanguageSelect settingName="to" onlyLanguage={toLanguage} />
+          <CardLanguageSelect settingName="from" onlyLanguage={fromLanguage || []} />
+          <CardLanguageSelect settingName="to" onlyLanguage={toLanguage || []} />
         </div>
         <div className="flex-1"></div>
-
-        <Button variant="contained" onClick={() => init()}>
-          Filter
-        </Button>
         <div className="ml-2" />
         <Button variant="contained" onClick={() => setOpenModal(true)}>
           Review
         </Button>
         <div className="ml-2" />
         <Button variant="outlined" onClick={() => setOpenReviewSetting(true)}>
-          Review Setting
+          Setting
         </Button>
       </div>
 
-      <Card cards={cards} open={openModal} closeModal={() => setOpenModal(false)} refresh={init} />
+      <ShowCard open={openModal} closeModal={() => setOpenModal(false)} />
 
-      <DeleteCard
-        card={currentCard}
-        refresh={() => {
-          init();
-          setCurrentCard(undefined);
-        }}
-        closeModal={() => setCurrentCard(undefined)}
-      />
-      <EditCard
-        card={editedCard}
-        refresh={() => {
-          init();
-          setEditedCard(undefined);
-        }}
-        closeModal={() => setEditedCard(undefined)}
-      />
+      <DeleteCard card={currentCard} closeModal={() => setCurrentCard(undefined)} />
+      <EditCard card={editedCard} closeModal={() => setEditedCard(undefined)} />
 
       <EditCardReview open={openReviewSetting} closeModal={() => setOpenReviewSetting(false)} />
 
@@ -133,35 +122,36 @@ export default function Home() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {cards.map((card: cardType, index: number) => (
-              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component="th" scope="row" align="right">
-                  {card.origin}
-                </TableCell>
-                <TableCell align="left">{card.translate}</TableCell>
-                <TableCell align="left">{card.sentence}</TableCell>
-                <TableCell align="left">{card.comment}</TableCell>
-                <TableCell align="center">
-                  <Rating name="simple-controlled" max={4} value={card.star} readOnly />
-                </TableCell>
-                <TableCell align="center">
-                  <>
-                    <Button onClick={() => setEditedCard(card)}>Edit</Button>
-                    <Button onClick={() => setCurrentCard(card)}>Delete</Button>
-                  </>
-                </TableCell>
-              </TableRow>
-            ))}
+            {cards &&
+              cards.map((card, index) => (
+                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell component="th" scope="row" align="right">
+                    {card.origin}
+                  </TableCell>
+                  <TableCell align="left">{card.translate}</TableCell>
+                  <TableCell align="left">{card.sentence}</TableCell>
+                  <TableCell align="left">{card.comment}</TableCell>
+                  <TableCell align="center">
+                    <Rating name="simple-controlled" max={4} value={card.star} readOnly />
+                  </TableCell>
+                  <TableCell align="center">
+                    <>
+                      <Button onClick={() => setEditedCard(card)}>Edit</Button>
+                      <Button onClick={() => setCurrentCard(card)}>Delete</Button>
+                    </>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         component="div"
-        count={count}
+        count={count || 0}
         rowsPerPage={pageSize}
         rowsPerPageOptions={[pageSize]}
         page={page}
-        onPageChange={(e, p) => init(p)}
+        onPageChange={(e, p) => setPage(p)}
       />
     </>
   );

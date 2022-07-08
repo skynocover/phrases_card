@@ -6,9 +6,8 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { settingStorage } from '../utils/setting.db';
-import { cardStorage } from '../utils/phrases.db';
 import Divider from '../components/Divider';
+import { db, Card } from '../utils/index.db';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -25,7 +24,6 @@ const style = {
   color: 'white',
 };
 
-// 太長會跑版
 export default function Index({
   modalOpen,
   closeModal,
@@ -49,17 +47,19 @@ export default function Index({
   }, [translate]);
 
   const newCard = async () => {
-    const from = detectFrom || (await settingStorage.get('from')) || 'auto';
-    const to = (await settingStorage.get('to')) || 'en';
-    const temp = {
+    const setting = await db.setting.get(1);
+    const from = detectFrom ? detectFrom : setting ? setting.homeTranslate.from : 'auto';
+    const to = setting ? setting.homeTranslate.to : 'zh-TW';
+    const temp: Card = {
       origin,
       translate,
       sentence,
       comment,
       from,
       to,
+      star: 0,
     };
-    await cardStorage.add(temp);
+    await db.cards.add(temp);
     closeModal();
   };
 
@@ -73,9 +73,10 @@ export default function Index({
       >
         <Box sx={style}>
           <div className="grid content-between h-full grid-cols-1">
-            <div />
             <div className="flex flex-col items-center ">
-              <Typography variant="h4">{sentence}</Typography>
+              <div className="w-full h-[180px] overflow-scroll p-2 mb-3 bg-gray-800">
+                <Typography variant="h6">{sentence}</Typography>
+              </div>
               <Typography variant="h4">{origin}</Typography>
 
               <Divider />

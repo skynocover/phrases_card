@@ -12,10 +12,12 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 import { translate, langs } from '../utils/translate.js';
-import { settingStorage } from '../utils/setting.db';
+// import { settingStorage } from '../utils/2setting.db';
 import { LanguageSelect } from '../components/LanguageSelect';
 import NewCard from '../modals/NewCard';
 import { speak } from '../utils/speak';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../utils/index.db';
 
 export default function Home() {
   const appCtx = React.useContext(AppContext);
@@ -30,14 +32,16 @@ export default function Home() {
 
   const [hightLightText, setHightLightText] = React.useState<string>('');
   const [selectedWord, setSelectedWord] = React.useState<string>('');
-  const [autoSpeech, setAutoSpeech] = React.useState<boolean>(false);
+  // const [autoSpeech, setAutoSpeech] = React.useState<boolean>(false);
 
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
 
+  const setting = useLiveQuery(() => db.setting.get(1), [modalOpen]);
+
   const getSelected = async () => {
-    const from = (await settingStorage.get('from')) || 'auto';
-    const to = (await settingStorage.get('to')) || 'en';
-    const autoSpeechSetting = (await settingStorage.get('autoSpeech')) || false;
+    const from = setting ? setting.homeTranslate.from : 'auto';
+    const to = setting ? setting.homeTranslate.to : 'en';
+    const autoSpeech = setting ? setting.homeAutoSpeech : false;
 
     const temp = window.getSelection();
     if (temp) {
@@ -46,7 +50,7 @@ export default function Home() {
         setHightLightText(selectText);
         const { text } = await translate(selectText, from, to);
         setSelectedWord(text.join(''));
-        if (autoSpeechSetting) {
+        if (autoSpeech) {
           speak(selectText, from);
         }
       }
@@ -54,9 +58,9 @@ export default function Home() {
   };
 
   const getTranslate = async () => {
-    const from = (await settingStorage.get('from')) || 'auto';
-    const to = (await settingStorage.get('to')) || 'en';
-    const autoSpeechSetting = (await settingStorage.get('autoSpeech')) || false;
+    const from = setting ? setting.homeTranslate.from : 'auto';
+    const to = setting ? setting.homeTranslate.to : 'en';
+    // const autoSpeech = setting ? setting.homeAutoSpeech : false;
 
     const { lang, text: textRes } = await translate(text, from, to);
 
@@ -69,7 +73,7 @@ export default function Home() {
     } else {
       setDetectLabel(undefined);
     }
-    setAutoSpeech(autoSpeechSetting);
+    // setAutoSpeech(autoSpeechSetting);
   };
 
   React.useEffect(() => {
@@ -77,7 +81,7 @@ export default function Home() {
   }, [text]);
 
   const Speak = async () => {
-    const from = (await settingStorage.get('from')) || 'auto';
+    const from = setting ? setting.homeTranslate.from : 'auto';
     speak(text, from);
   };
 
@@ -101,11 +105,14 @@ export default function Home() {
         <IconButton
           aria-label="delete"
           onClick={async () => {
-            await settingStorage.set('autoSpeech', !autoSpeech);
-            setAutoSpeech(!autoSpeech);
+            if (setting) {
+              await db.setting.put({ ...setting, homeAutoSpeech: !setting.homeAutoSpeech });
+            }
+            // await settingStorage.set('autoSpeech', !autoSpeech);
+            // setAutoSpeech(!autoSpeech);
           }}
         >
-          {autoSpeech ? <VolumeUpIcon /> : <VolumeOffIcon />}
+          {(setting ? setting.homeAutoSpeech : false) ? <VolumeUpIcon /> : <VolumeOffIcon />}
         </IconButton>
         <Button variant="contained" onClick={() => selectedWord && setModalOpen(true)}>
           Create New Card
@@ -114,7 +121,7 @@ export default function Home() {
       <Grid container>
         <Grid item xs>
           <div className="flex-col justify-center m-2">
-            <div className="flex">
+            <div className="flex items-start">
               <LanguageSelect settingName="from" />
 
               <IconButton

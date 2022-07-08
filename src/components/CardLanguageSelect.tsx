@@ -9,23 +9,19 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 
 import { langs } from '../utils/translate.js';
-import { settingStorage } from '../utils/setting.db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../utils/index.db';
 
 export default function CardLanguageSelect({
   settingName,
   onlyLanguage,
 }: {
-  settingName: string;
+  settingName: 'from' | 'to';
   onlyLanguage: string[];
 }) {
   const [expand, setExpand] = React.useState<boolean>(false);
-  const [language, setLanguage] = React.useState<string>('');
 
-  const setSettingStorage = async (input: string) => await settingStorage.set(settingName, input);
-
-  React.useEffect(() => {
-    settingStorage.get(settingName).then((item) => setLanguage(item || 'en'));
-  }, []);
+  const setting = useLiveQuery(() => db.setting.get(1), [expand]);
 
   return (
     <Accordion expanded={expand} onChange={() => setExpand(!expand)}>
@@ -35,33 +31,41 @@ export default function CardLanguageSelect({
         id="panel1a-header"
       >
         {/** @ts-ignore */}
-        <Typography>{langs[language]}</Typography>
+        <Typography>{langs[setting ? setting.cardTranslate[settingName] : 'en']}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <div className="grid gap-2 xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2">
-          {onlyLanguage.map((item, index) => {
-            return (
-              <div
-                className={`flex justify-center item-center ${
-                  item === language && 'border border-slate-400'
-                }`}
-                key={index}
-              >
-                <Button
+          {onlyLanguage
+            .filter((item) => item !== 'auto')
+            .map((item, index) => {
+              return (
+                <div
+                  className={`flex justify-center item-center ${
+                    item === (setting ? setting.cardTranslate[settingName] : 'en') &&
+                    'border border-slate-400'
+                  }`}
                   key={index}
-                  variant="text"
-                  onClick={() => {
-                    setLanguage(item);
-                    setSettingStorage(item);
-                    setExpand(false);
-                  }}
                 >
-                  {/** @ts-ignore */}
-                  {langs[item]}
-                </Button>
-              </div>
-            );
-          })}
+                  <Button
+                    key={index}
+                    variant="text"
+                    onClick={() => {
+                      if (setting) {
+                        setting.cardTranslate[settingName] = item;
+                        db.setting.put({
+                          ...setting,
+                          cardTranslate: { ...setting.cardTranslate },
+                        });
+                      }
+                      setExpand(false);
+                    }}
+                  >
+                    {/** @ts-ignore */}
+                    {langs[item]}
+                  </Button>
+                </div>
+              );
+            })}
         </div>
       </AccordionDetails>
     </Accordion>

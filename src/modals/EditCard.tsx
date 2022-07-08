@@ -8,8 +8,7 @@ import Typography from '@mui/material/Typography';
 import Rating from '@mui/material/Rating';
 
 import Divider from '../components/Divider';
-import { cardStorage } from '../utils/phrases.db';
-import { cardType } from './Card';
+import { db, Card } from '../utils/index.db';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -26,16 +25,8 @@ const style = {
   color: 'white',
 };
 
-export default function Index({
-  card,
-  closeModal,
-  refresh,
-}: {
-  card: cardType | undefined;
-  closeModal: any;
-  refresh: Function;
-}) {
-  const [newCard, setNewCard] = React.useState<cardType>();
+export default function Index({ card, closeModal }: { card: Card | undefined; closeModal: any }) {
+  const [newCard, setNewCard] = React.useState<Card>();
 
   React.useEffect(() => {
     if (card) {
@@ -44,8 +35,10 @@ export default function Index({
   }, [card]);
 
   const editCard = async () => {
-    await cardStorage.set(newCard);
-    refresh();
+    if (newCard) {
+      await db.cards.put(newCard);
+    }
+    closeModal();
   };
 
   return (
@@ -61,21 +54,23 @@ export default function Index({
             <div />
             <div className="flex flex-col items-center ">
               <TextField
+                label="Sentence"
+                variant="outlined"
+                multiline={true}
+                maxRows={6}
+                margin="normal"
+                style={{ width: '75%' }}
+                onChange={(e) => newCard && setNewCard({ ...newCard, sentence: e.target.value })}
+                value={newCard?.sentence}
+              />
+
+              <TextField
                 label="Origin"
                 variant="outlined"
                 margin="normal"
                 style={{ width: '75%' }}
                 onChange={(e) => newCard && setNewCard({ ...newCard, origin: e.target.value })}
                 value={newCard?.origin}
-              />
-
-              <TextField
-                label="Sentence"
-                variant="outlined"
-                margin="normal"
-                style={{ width: '75%' }}
-                onChange={(e) => newCard && setNewCard({ ...newCard, sentence: e.target.value })}
-                value={newCard?.sentence}
               />
 
               <Divider />
@@ -100,11 +95,9 @@ export default function Index({
 
               <Rating
                 name="simple-controlled"
-                value={newCard?.star}
+                value={newCard?.star || 0}
                 max={4}
-                onChange={(event, newValue) =>
-                  newCard && setNewCard({ ...newCard, star: newValue || 0 })
-                }
+                onChange={(e, v) => newCard && v && setNewCard({ ...newCard, star: v })}
               />
             </div>
             <div className="flex justify-center">

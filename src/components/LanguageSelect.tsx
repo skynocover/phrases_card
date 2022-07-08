@@ -9,25 +9,21 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 
 import { langs } from '../utils/translate.js';
-import { settingStorage } from '../utils/setting.db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../utils/index.db';
 
 const LanguageSelect = ({
   settingName,
   forbiddenAuto,
 }: {
-  settingName: string;
+  settingName: 'from' | 'to';
   forbiddenAuto?: boolean;
 }) => {
   // 搜尋的Filter
   const [filter, setFilter] = React.useState<string>('');
   const [expand, setExpand] = React.useState<boolean>(false);
-  const [language, setLanguage] = React.useState<string>('');
 
-  const setSettingStorage = async (input: string) => await settingStorage.set(settingName, input);
-
-  React.useEffect(() => {
-    settingStorage.get(settingName).then((item) => setLanguage(item || 'en'));
-  }, []);
+  const setting = useLiveQuery(() => db.setting.get(1), [expand]);
 
   return (
     <Accordion expanded={expand} onChange={() => setExpand(!expand)}>
@@ -37,7 +33,7 @@ const LanguageSelect = ({
         id="panel1a-header"
       >
         {/** @ts-ignore */}
-        <Typography>{langs[language]}</Typography>
+        <Typography>{langs[setting ? setting.homeTranslate[settingName] : 'en']}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <div className="mb-2">
@@ -62,16 +58,23 @@ const LanguageSelect = ({
               return (
                 <div
                   className={`flex justify-center item-center ${
-                    item === language && 'border border-slate-400'
+                    item === (setting ? setting.homeTranslate[settingName] : 'en') &&
+                    'border border-slate-400'
                   }`}
                   key={index}
                 >
                   <Button
                     key={index}
                     variant="text"
-                    onClick={() => {
-                      setLanguage(item);
-                      setSettingStorage(item);
+                    onClick={async () => {
+                      if (setting) {
+                        setting.homeTranslate[settingName] = item;
+                        db.setting.put({
+                          ...setting,
+                          homeTranslate: { ...setting.homeTranslate },
+                        });
+                      }
+
                       setExpand(false);
                     }}
                   >

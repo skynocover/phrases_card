@@ -9,11 +9,12 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
+import Typography from '@mui/material/Typography';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import InputAdornment from '@mui/material/InputAdornment';
-
-import { settingStorage } from '../utils/setting.db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../utils/index.db';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -32,10 +33,28 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
   const [reviewNumber, setReviewNumber] = React.useState<number>(0);
   const [probability, setProbability] = React.useState<number[]>([]);
 
+  const setting = useLiveQuery(() => db.setting.get(1), [open]);
+  const cardCount = useLiveQuery(async () => {
+    let temp = [];
+    for (let i = 0; i <= 4; i++) {
+      const count = await db.cards
+        .where('star')
+        .equals(i)
+        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
+        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .count();
+      temp.push(count);
+    }
+
+    return temp;
+  });
+
   React.useEffect(() => {
-    settingStorage.get('reviewNumber').then((item) => setReviewNumber(item || 40));
-    settingStorage.get('probability').then((item) => setProbability(item || [40, 30, 20, 5, 5]));
-  }, []);
+    if (setting) {
+      setReviewNumber(setting.review.reviewNumber);
+      setProbability(setting.review.probability);
+    }
+  }, [setting]);
 
   const changeProbability = (index: number, input: number) => {
     const temp = [...probability];
@@ -49,8 +68,9 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
   };
 
   const setSetting = async () => {
-    settingStorage.set('reviewNumber', reviewNumber);
-    settingStorage.set('probability', probability);
+    if (setting) {
+      await db.setting.put({ ...setting, review: { reviewNumber, probability } });
+    }
     closeModal();
   };
 
@@ -66,8 +86,9 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
           <div className="grid content-between h-full grid-cols-1">
             <div />
             <div className="flex flex-col items-center ">
+              <Typography variant="h4">Take cards into review deck</Typography>
               <TextField
-                label="Review Deck"
+                label="Deck quantity"
                 variant="outlined"
                 margin="normal"
                 style={{ width: '75%' }}
@@ -81,8 +102,10 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
                   <TableHead>
                     <TableRow>
                       <TableCell align="right">Star</TableCell>
-                      <TableCell align="left">Probability</TableCell>
-                      <TableCell align="center">Cards</TableCell>
+                      <TableCell align="left">Take Probability</TableCell>
+                      <TableCell width="200px" align="center">
+                        Take / Total
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -110,8 +133,12 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
                                 }}
                               />
                             </TableCell>
-                            <TableCell width="50px" align="center">
-                              {(reviewNumber * item) / 100}
+                            <TableCell align="center">
+                              <Typography variant="h6">
+                                {Math.round((reviewNumber * item) / 100) +
+                                  ' / ' +
+                                  (cardCount && cardCount[index])}
+                              </Typography>
                             </TableCell>
                           </TableRow>
                         </>
