@@ -51,7 +51,7 @@ export default function Home() {
         const { text } = await translate(selectText, from, to);
         setSelectedWord(text.join(''));
         if (autoSpeech) {
-          speak(selectText, from);
+          speak(selectText, detectFrom || from);
         }
       }
     }
@@ -82,7 +82,7 @@ export default function Home() {
 
   const Speak = async () => {
     const from = setting ? setting.homeTranslate.from : 'auto';
-    speak(text, from);
+    speak(text, detectFrom || from);
   };
 
   return (
