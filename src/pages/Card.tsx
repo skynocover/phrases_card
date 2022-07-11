@@ -22,7 +22,7 @@ import { languages } from '../utils/translate.js';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Card } from '../utils/index.db';
 
-export default function Home() {
+export default function Index() {
   const appCtx = React.useContext(AppContext);
 
   const pageSize = 10;
