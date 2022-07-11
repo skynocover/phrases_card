@@ -4,16 +4,17 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
-
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import IconButton from '@mui/material/IconButton';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 import { AppContext } from '../AppContext';
 import Divider from '../components/Divider';
 import { db, Card } from '../utils/index.db';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { ConstructionOutlined } from '@mui/icons-material';
+import { speak } from '../utils/speak';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -54,6 +55,7 @@ const Enter = () => {
 
 const choices = (arr: any[], take: number) => arr.sort(() => Math.random() - 0.5).slice(0, take);
 
+// todo: 反向
 export default function Index({ open, closeModal }: { open: boolean; closeModal: Function }) {
   const [index, setIndex] = React.useState<number>(0);
   const [cards, setCards] = React.useState<Card[]>([]);
@@ -78,7 +80,6 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
           .and((c) => c.to === to)
           .toArray();
         const takeCards = choices(cards, need + needTakeMore);
-        // console.log({ index:i, need, needTakeMore, cards, takeCards });
         needTakeMore += need - takeCards.length;
         tempCards.push(...takeCards);
       }
@@ -91,26 +92,35 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
     init();
   }, [setting]);
 
+  const autoSpeak = () => {
+    if (setting?.cardTranslate.autoSpeech) {
+      speak(cards[index].origin, cards[index].from);
+    }
+  };
+
   React.useEffect(() => {
     if (open) {
+      autoSpeak();
       setAnswer(false);
     }
   }, [open]);
 
   React.useEffect(() => {
+    if (answer) {
+      autoSpeak();
+    }
     setAnswer(false);
   }, [index]);
 
   const next = async (key: '1' | '2' | '3' | '4' | 'Enter') => {
     if (answer) {
+      await db.cards.put({ ...cards[index], star: key === 'Enter' ? 2 : +key });
       if (index + 1 > cards.length - 1) {
         closeModal();
         setAnswer(false);
         setIndex(0);
         return;
       }
-      console.log(cards[index]);
-      await db.cards.put({ ...cards[index], star: key === 'Enter' ? 2 : +key });
       setIndex(index + 1);
     } else if (key === 'Enter') {
       setAnswer(true);
@@ -137,9 +147,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
     <div onKeyUp={keyDownHandler}>
       <Modal
         open={open}
-        onClose={() => {
-          closeModal();
-        }}
+        onClose={() => closeModal()}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -160,7 +168,17 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
                   <Typography variant="h6">{cards[index].sentence}</Typography>
                 </div>
               )}
-              {cards.length > 0 && <Typography variant="h4">{cards[index].origin}</Typography>}
+              {cards.length > 0 && (
+                <div className="flex items-center">
+                  <Typography variant="h4">{cards[index].origin}</Typography>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => speak(cards[index].origin, cards[index].from)}
+                  >
+                    <VolumeUpIcon />
+                  </IconButton>
+                </div>
+              )}
 
               {answer && (
                 <>

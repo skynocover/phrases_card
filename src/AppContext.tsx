@@ -10,10 +10,9 @@ interface AppProviderProps {
 }
 
 const defaultSetting: Setting = {
-  homeTranslate: { from: 'auto', to: 'zh-TW' },
-  cardTranslate: { from: 'en', to: 'zh-TW' },
+  homeTranslate: { from: 'auto', to: 'zh-TW', autoSpeech: false },
+  cardTranslate: { from: 'en', to: 'zh-TW', autoSpeech: false },
   review: { probability: [40, 30, 20, 5, 5], reviewNumber: 40 },
-  homeAutoSpeech: false,
 };
 
 const AppProvider = ({ children }: AppProviderProps) => {

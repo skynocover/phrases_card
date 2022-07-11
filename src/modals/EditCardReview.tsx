@@ -8,11 +8,14 @@ import Rating from '@mui/material/Rating';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 import Typography from '@mui/material/Typography';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import InputAdornment from '@mui/material/InputAdornment';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../utils/index.db';
 
@@ -87,15 +90,35 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
             <div />
             <div className="flex flex-col items-center ">
               <Typography variant="h4">Take cards into review deck</Typography>
-              <TextField
-                label="Deck quantity"
-                variant="outlined"
-                margin="normal"
-                style={{ width: '75%' }}
-                type="number"
-                onChange={(e) => setReviewNumber(+e.target.value)}
-                defaultValue={reviewNumber || 40}
-              />
+              <div className="flex space-x-2">
+                <TextField
+                  label="Deck quantity"
+                  variant="outlined"
+                  margin="normal"
+                  type="number"
+                  onChange={(e) => setReviewNumber(+e.target.value)}
+                  defaultValue={reviewNumber || 40}
+                />
+                <div className="flex items-center">
+                  <Typography variant="h6">Auto speak</Typography>
+
+                  <IconButton
+                    aria-label="delete"
+                    onClick={async () => {
+                      if (setting) {
+                        setting.cardTranslate.autoSpeech = !setting.cardTranslate.autoSpeech;
+                        await db.setting.put({ ...setting });
+                      }
+                    }}
+                  >
+                    {(setting ? setting.cardTranslate.autoSpeech : false) ? (
+                      <VolumeUpIcon />
+                    ) : (
+                      <VolumeOffIcon />
+                    )}
+                  </IconButton>
+                </div>
+              </div>
 
               <TableContainer>
                 <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">

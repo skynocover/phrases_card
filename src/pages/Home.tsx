@@ -41,7 +41,7 @@ export default function Home() {
   const getSelected = async () => {
     const from = setting ? setting.homeTranslate.from : 'auto';
     const to = setting ? setting.homeTranslate.to : 'en';
-    const autoSpeech = setting ? setting.homeAutoSpeech : false;
+    const autoSpeech = setting ? setting.homeTranslate.autoSpeech : false;
 
     const temp = window.getSelection();
     if (temp) {
@@ -106,13 +106,16 @@ export default function Home() {
           aria-label="delete"
           onClick={async () => {
             if (setting) {
-              await db.setting.put({ ...setting, homeAutoSpeech: !setting.homeAutoSpeech });
+              setting.homeTranslate.autoSpeech = !setting.homeTranslate.autoSpeech;
+              await db.setting.put({ ...setting });
             }
-            // await settingStorage.set('autoSpeech', !autoSpeech);
-            // setAutoSpeech(!autoSpeech);
           }}
         >
-          {(setting ? setting.homeAutoSpeech : false) ? <VolumeUpIcon /> : <VolumeOffIcon />}
+          {(setting ? setting.homeTranslate.autoSpeech : false) ? (
+            <VolumeUpIcon />
+          ) : (
+            <VolumeOffIcon />
+          )}
         </IconButton>
         <Button variant="contained" onClick={() => selectedWord && setModalOpen(true)}>
           Create New Card

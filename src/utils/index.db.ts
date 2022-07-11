@@ -16,12 +16,12 @@ export interface Setting {
   homeTranslate: translateSetting;
   cardTranslate: translateSetting;
   review: reviewSetting;
-  homeAutoSpeech: boolean;
 }
 
 interface translateSetting {
   from: string;
   to: string;
+  autoSpeech: boolean;
 }
 
 interface reviewSetting {
@@ -38,6 +38,21 @@ class PhraseCards extends Dexie {
       cards: '++id,from,to,star',
       setting: '++id,homeTranslate,cardTranslate,review',
     });
+
+    this.version(2)
+      .stores({
+        cards: '++id,from,to,star,origin,translate',
+        setting: '++id,homeTranslate,cardTranslate,review',
+      })
+      .upgrade((trans) => {
+        return trans.db
+          .table('phrase_cards')
+          .toCollection()
+          .modify((setting) => {
+            setting.homeTranslate.autoSpeech = setting.homeAutoSpeech;
+            delete setting.homeAutoSpeech;
+          });
+      });
   }
 }
 

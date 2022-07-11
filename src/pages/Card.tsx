@@ -11,6 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import Slider from '@mui/material/Slider';
+import TextField from '@mui/material/TextField';
 
 import { AppContext } from '../AppContext';
 import ShowCard from '../modals/ShowCard';
@@ -28,6 +29,7 @@ export default function Index() {
 
   const pageSize = 10;
   const [page, setPage] = React.useState<number>(0);
+  const [searchInput, setSearchInput] = React.useState<string>('');
   const [range, setRange] = React.useState<number[]>([0, 4]);
 
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -43,12 +45,13 @@ export default function Index() {
       db.cards
         .where('star')
         .between(range[0], range[1], true, true)
+        .and((c) => (searchInput === '' ? true : c.origin.includes(searchInput)))
         .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
         .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
         .offset(page * pageSize)
         .limit(pageSize)
         .sortBy('star'),
-    [page, setting, range],
+    [page, setting, range, searchInput],
   );
 
   const count = useLiveQuery(
@@ -56,10 +59,11 @@ export default function Index() {
       db.cards
         .where('star')
         .between(range[0], range[1], true, true)
+        .and((c) => (searchInput === '' ? true : c.origin.includes(searchInput)))
         .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
         .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
         .count(),
-    [setting],
+    [page, setting, range, searchInput],
   );
 
   const fromLanguage = useLiveQuery(async () => {
@@ -99,8 +103,16 @@ export default function Index() {
         </Button>
       </div>
 
-      <div className="mx-4">
+      <div className="flex items-center justify-start mx-4 space-x-4">
+        <TextField
+          label="Search origin"
+          variant="outlined"
+          margin="normal"
+          onChange={(e) => setSearchInput(e.target.value)}
+          value={searchInput}
+        />
         <Slider
+          style={{ width: '25%' }}
           marks
           max={4}
           value={range}
