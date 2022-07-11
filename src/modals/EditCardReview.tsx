@@ -37,6 +37,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
   const [probability, setProbability] = React.useState<number[]>([]);
 
   const setting = useLiveQuery(() => db.setting.get(1), [open]);
+
   const cardCount = useLiveQuery(async () => {
     let temp = [];
     for (let i = 0; i <= 4; i++) {
@@ -50,7 +51,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
     }
 
     return temp;
-  });
+  }, [setting]);
 
   React.useEffect(() => {
     if (setting) {
