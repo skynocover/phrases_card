@@ -34,7 +34,7 @@ export default function CardLanguageSelect({
         <Typography>{langs[setting ? setting.cardTranslate[settingName] : 'en']}</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <div className="grid gap-2 xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2">
+        <div className="grid gap-2 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2">
           {onlyLanguage
             .filter((item) => item !== 'auto')
             .map((item, index) => {
