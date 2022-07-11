@@ -46,7 +46,7 @@ class PhraseCards extends Dexie {
       })
       .upgrade((trans) => {
         return trans.db
-          .table('phrase_cards')
+          .table('setting')
           .toCollection()
           .modify((setting) => {
             setting.homeTranslate.autoSpeech = setting.homeAutoSpeech;
