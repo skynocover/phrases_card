@@ -21,7 +21,6 @@ const AppProvider = ({ children }: AppProviderProps) => {
     try {
       const setting = await db.setting.get(1);
       if (!setting) {
-        console.log('SETTING!!!!!!');
         await db.setting.add(defaultSetting);
       }
     } catch (error) {}
