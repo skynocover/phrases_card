@@ -13,16 +13,16 @@ import TablePagination from '@mui/material/TablePagination';
 import Slider from '@mui/material/Slider';
 import TextField from '@mui/material/TextField';
 
+import { useLiveQuery } from 'dexie-react-hooks';
+
 import { AppContext } from '../AppContext';
 import ShowCard from '../modals/ShowCard';
 import DeleteCard from '../modals/DeleteCard';
 import EditCard from '../modals/EditCard';
 import EditCardReview from '../modals/EditCardReview';
 import CardLanguageSelect from '../components/CardLanguageSelect';
-
-import { languages } from '../utils/translate.js';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Card } from '../utils/index.db';
+import { getLanguages } from '../utils/cardQuery';
 
 export default function Index() {
   const appCtx = React.useContext(AppContext);
@@ -66,23 +66,8 @@ export default function Index() {
     [page, setting, range, searchInput],
   );
 
-  const fromLanguage = useLiveQuery(async () => {
-    const temp = languages.map(
-      async (item) => (await db.cards.where('from').equals(item).count()) > 0,
-    );
-    const booleans = await Promise.all(temp);
-
-    return languages.filter((_, i) => booleans[i]);
-  });
-
-  const toLanguage = useLiveQuery(async () => {
-    const temp = languages.map(
-      async (item) => (await db.cards.where('to').equals(item).count()) > 0,
-    );
-    const booleans = await Promise.all(temp);
-
-    return languages.filter((_, i) => booleans[i]);
-  });
+  const fromLanguage = useLiveQuery(async () => await getLanguages('from'));
+  const toLanguage = useLiveQuery(async () => await getLanguages('to'));
 
   return (
     <>
