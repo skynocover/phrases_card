@@ -120,8 +120,14 @@ export default function Index() {
         <div className="flex items-center space-x-2">
           <Typography>Import from </Typography>
           <ButtonGroup variant="outlined">
-            <Button onClick={importFromJSON}>JSON</Button>
-            <Button onClick={importFromXlsx}>EXCEL</Button>
+            <Button component="label">
+              JSON
+              <input hidden type="file" onChange={importFromJSON} />
+            </Button>
+            <Button component="label">
+              Xlsx
+              <input hidden type="file" onChange={importFromXlsx} />
+            </Button>
           </ButtonGroup>
         </div>
       </div>
