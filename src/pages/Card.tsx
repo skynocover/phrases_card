@@ -113,7 +113,7 @@ export default function Index() {
           <Typography>Export as </Typography>
           <ButtonGroup variant="outlined">
             <Button onClick={export2JSON}>JSON</Button>
-            <Button onClick={export2Xlsx}>EXCEL</Button>
+            <Button onClick={export2Xlsx}>Xlsx</Button>
           </ButtonGroup>
         </div>
 
