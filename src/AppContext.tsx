@@ -1,5 +1,4 @@
 import React from 'react';
-import { db, Setting } from './utils/index.db';
 
 interface AppContextProps {}
 
@@ -9,19 +8,9 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
-const defaultSetting: Setting = {
-  homeTranslate: { from: 'auto', to: 'zh-TW', autoSpeech: false },
-  cardTranslate: { from: 'en', to: 'zh-TW', autoSpeech: false },
-  review: { probability: [40, 30, 20, 5, 5], reviewNumber: 40 },
-};
-
 const AppProvider = ({ children }: AppProviderProps) => {
   const init = async () => {
     try {
-      const setting = await db.setting.get(1);
-      if (!setting) {
-        await db.setting.add(defaultSetting);
-      }
     } catch (error) {}
   };
 

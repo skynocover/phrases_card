@@ -12,6 +12,8 @@ import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import Slider from '@mui/material/Slider';
 import TextField from '@mui/material/TextField';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Typography from '@mui/material/Typography';
 
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -23,6 +25,8 @@ import EditCardReview from '../modals/EditCardReview';
 import CardLanguageSelect from '../components/CardLanguageSelect';
 import { db, Card } from '../utils/index.db';
 import { getLanguages } from '../utils/cardQuery';
+
+import { importFromXlsx, importFromJSON, export2JSON, export2Xlsx } from '../utils/import_export';
 
 export default function Index() {
   const appCtx = React.useContext(AppContext);
@@ -104,6 +108,28 @@ export default function Index() {
           onChange={(e, newValue) => setRange(newValue as number[])}
           getAriaValueText={(v) => `${v}`}
         />
+        <div className="flex-1" />
+        <div className="flex items-center space-x-2">
+          <Typography>Export as </Typography>
+          <ButtonGroup variant="outlined">
+            <Button onClick={export2JSON}>JSON</Button>
+            <Button onClick={export2Xlsx}>Xlsx</Button>
+          </ButtonGroup>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Typography>Import from </Typography>
+          <ButtonGroup variant="outlined">
+            <Button component="label">
+              JSON
+              <input hidden type="file" onChange={importFromJSON} />
+            </Button>
+            <Button component="label">
+              Xlsx
+              <input hidden type="file" onChange={importFromXlsx} />
+            </Button>
+          </ButtonGroup>
+        </div>
       </div>
 
       <ShowCard open={openModal} closeModal={() => setOpenModal(false)} />
