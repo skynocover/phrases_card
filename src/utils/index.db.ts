@@ -44,24 +44,9 @@ class PhraseCards extends Dexie {
   public constructor() {
     super('phrase_cards');
     this.version(1).stores({
-      cards: '++id,from,to,star',
+      cards: '++id,from,to,star,origin,translate',
       setting: '++id,homeTranslate,cardTranslate,review',
     });
-
-    this.version(2)
-      .stores({
-        cards: '++id,from,to,star,origin,translate',
-        setting: '++id,homeTranslate,cardTranslate,review',
-      })
-      .upgrade((trans) => {
-        return trans.db
-          .table('setting')
-          .toCollection()
-          .modify((setting) => {
-            setting.homeTranslate.autoSpeech = setting.homeAutoSpeech;
-            delete setting.homeAutoSpeech;
-          });
-      });
   }
 }
 
