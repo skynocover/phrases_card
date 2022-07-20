@@ -39,12 +39,7 @@ const steps = [
           button
         </Typography>
 
-        <img
-          className="mt-2"
-          src={'/public/airtable/template.png'}
-          alt={'template'}
-          loading="lazy"
-        />
+        <img className="mt-2" src={'/airtable/template.png'} alt={'template'} loading="lazy" />
       </>
     ),
   },
@@ -56,12 +51,7 @@ const steps = [
           After you have completed copying the base, copy and paste its url
         </Typography>
 
-        <img
-          className="mt-2"
-          src={'/public/airtable/setting.png'}
-          alt={'template'}
-          loading="lazy"
-        />
+        <img className="mt-2" src={'/airtable/setting.png'} alt={'template'} loading="lazy" />
       </>
     ),
   },
@@ -81,16 +71,11 @@ const steps = [
           button
         </Typography>
 
-        <img
-          className="mt-2"
-          src={'/public/airtable/generate.png'}
-          alt={'template'}
-          loading="lazy"
-        />
+        <img className="mt-2" src={'/airtable/generate.png'} alt={'template'} loading="lazy" />
 
         <Typography variant="h6">And paste it to above input</Typography>
 
-        <img className="mt-2" src={'/public/airtable/key.png'} alt={'template'} loading="lazy" />
+        <img className="mt-2" src={'/airtable/key.png'} alt={'template'} loading="lazy" />
       </>
     ),
   },
