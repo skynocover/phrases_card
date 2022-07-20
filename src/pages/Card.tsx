@@ -13,7 +13,6 @@ import TablePagination from '@mui/material/TablePagination';
 import Slider from '@mui/material/Slider';
 import TextField from '@mui/material/TextField';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import Typography from '@mui/material/Typography';
 
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -23,10 +22,9 @@ import DeleteCard from '../modals/DeleteCard';
 import EditCard from '../modals/EditCard';
 import EditCardReview from '../modals/EditCardReview';
 import CardLanguageSelect from '../components/CardLanguageSelect';
+import AdditionalAction from '../components/AdditionalAction';
 import { db, Card } from '../utils/index.db';
 import { getLanguages } from '../utils/cardQuery';
-
-import { importFromXlsx, importFromJSON, export2JSON, export2Xlsx } from '../utils/import_export';
 
 export default function Index() {
   const appCtx = React.useContext(AppContext);
@@ -75,7 +73,7 @@ export default function Index() {
 
   return (
     <>
-      <div className="flex items-start mt-2 mr-2">
+      <div className="flex items-center mt-2 mr-2">
         <div className="grid grid-cols-2 ">
           <CardLanguageSelect settingName="from" onlyLanguage={fromLanguage || []} />
           <CardLanguageSelect settingName="to" onlyLanguage={toLanguage || []} />
@@ -83,13 +81,14 @@ export default function Index() {
         <div className="flex-1"></div>
         <div className="ml-2" />
 
-        <Button variant="contained" onClick={() => setOpenModal(true)}>
-          Review
-        </Button>
-        <div className="ml-2" />
-        <Button variant="outlined" onClick={() => setOpenReviewSetting(true)}>
-          Setting
-        </Button>
+        <ButtonGroup>
+          <Button variant="contained" onClick={() => setOpenModal(true)}>
+            Review
+          </Button>
+          <Button variant="outlined" onClick={() => setOpenReviewSetting(true)}>
+            Setting
+          </Button>
+        </ButtonGroup>
       </div>
 
       <div className="flex items-center justify-start mx-4 space-x-4">
@@ -109,27 +108,8 @@ export default function Index() {
           getAriaValueText={(v) => `${v}`}
         />
         <div className="flex-1" />
-        <div className="flex items-center space-x-2">
-          <Typography>Export as </Typography>
-          <ButtonGroup variant="outlined">
-            <Button onClick={export2JSON}>JSON</Button>
-            <Button onClick={export2Xlsx}>Xlsx</Button>
-          </ButtonGroup>
-        </div>
 
-        <div className="flex items-center space-x-2">
-          <Typography>Import from </Typography>
-          <ButtonGroup variant="outlined">
-            <Button component="label">
-              JSON
-              <input hidden type="file" onChange={importFromJSON} />
-            </Button>
-            <Button component="label">
-              Xlsx
-              <input hidden type="file" onChange={importFromXlsx} />
-            </Button>
-          </ButtonGroup>
-        </div>
+        <AdditionalAction />
       </div>
 
       <ShowCard open={openModal} closeModal={() => setOpenModal(false)} />

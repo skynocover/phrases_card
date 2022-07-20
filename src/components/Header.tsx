@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,19 +12,10 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
-import Backendless from 'backendless';
-import { Link } from 'react-router-dom';
-
 import { AppContext } from '../AppContext';
-
-import * as backendless from '../libs/backendless';
 import * as firebase from '../libs/firebase';
-
 import { useBackendless } from '../hooks/useBackendless';
-
-import * as syncDB from '../utils/syncDatabase';
 import { db, Card } from '../utils/index.db';
-import { getLanguages } from '../utils/cardQuery';
 
 const pages = ['About', 'Card'];
 
@@ -130,32 +122,10 @@ const ResponsiveAppBar = () => {
     window.clearAll = function () {
       db.cards.clear();
     };
-
-    /** @ts-ignore */
-    window.login = async function () {
-      await emailLogin('demo@gmail.com', '123456');
-    };
-
-    /** @ts-ignore */
-    window.currentUser = async function () {
-      await getCurrentUser();
-    };
-
-    /** @ts-ignore */
-    window.setSetting = async function () {
-      const result = await syncDB.setSetting();
-      console.log(result);
-    };
-
-    /** @ts-ignore */
-    window.getSetting = syncDB.getSetting;
-
-    /** @ts-ignore */
-    window.setAirtable = syncDB.setAirtable;
   }, []);
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ height: 70 }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Link to="/">

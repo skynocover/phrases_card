@@ -7,9 +7,9 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Card from './pages/Card';
 import Login from './pages/Login';
+import Setting from './pages/Setting';
 import Header from './components/Header';
-
-import * as syncDB from './utils/syncDatabase';
+import useSetting from './hooks/useSetting';
 
 const NotFound = () => {
   return <div>This is wrong way</div>;
@@ -22,9 +22,10 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const { syncSetting } = useSetting();
   const init = async () => {
     try {
-      await syncDB.getSetting();
+      await syncSetting();
     } catch (error) {}
   };
   // useBeforeunload(async (event) => {
@@ -35,9 +36,9 @@ function App() {
   useEffect(() => {
     init();
     const handleTabClose = async (event: any) => {
-      event.preventDefault();
-      event.returnValue = false;
-      await syncDB.setSetting();
+      // event.preventDefault();
+      // event.returnValue = false;
+      // await syncDB.setSetting();
       return;
     };
     window.addEventListener('beforeunload', handleTabClose);
@@ -55,6 +56,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="about" element={<About />} />
           <Route path="card" element={<Card />} />
+          <Route path="setting" element={<Setting />} />
           <Route path="login" element={<Login />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

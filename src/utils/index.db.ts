@@ -19,6 +19,7 @@ export interface Setting {
   homeTranslate: translateSetting;
   cardTranslate: translateSetting;
   review: reviewSetting;
+  airtable?: airtableSetting;
 }
 
 interface translateSetting {
@@ -30,6 +31,11 @@ interface translateSetting {
 interface reviewSetting {
   probability: number[];
   reviewNumber: number;
+}
+
+interface airtableSetting {
+  url: string;
+  key: string;
 }
 
 class PhraseCards extends Dexie {

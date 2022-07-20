@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AppContext } from '../AppContext';
-
 import * as firebase from '../libs/firebase';
-import * as syncDB from '../utils/syncDatabase';
 import { useBackendless } from '../hooks/useBackendless';
+import useSetting from '../hooks/useSetting';
 
 export default function Index(props: any) {
   const { emailLogin, googleLogin, currentUser } = useBackendless();
+  const { syncSetting } = useSetting();
   const navigate = useNavigate();
 
   const demoLogin = async () => {
@@ -28,7 +27,7 @@ export default function Index(props: any) {
 
   React.useEffect(() => {
     if (currentUser) {
-      syncDB.getSetting().then(() => {
+      syncSetting().then(() => {
         navigate('/');
       });
     }
