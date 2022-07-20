@@ -47,15 +47,6 @@ export default function Index(props: any) {
         <div className="w-full h-100">
           <h1 className="mt-12 text-xl font-bold leading-tight md:text-2xl">PhraseCards</h1>
 
-          <div className="mt-6">
-            <button
-              className="block w-full px-4 py-3 mt-6 font-semibold text-white bg-indigo-500 rounded-lg hover:bg-indigo-400 focus:bg-indigo-400"
-              onClick={demoLogin}
-            >
-              TRY DEMO?
-            </button>
-          </div>
-
           <hr className="w-full my-6 border-gray-300" />
 
           <button

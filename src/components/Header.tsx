@@ -17,7 +17,7 @@ import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
 import { db, Card } from '../utils/index.db';
 
-const pages = ['About', 'Card'];
+const pages = ['About', 'Cards'];
 
 const ResponsiveAppBar = () => {
   const appCtx = React.useContext(AppContext);
@@ -121,6 +121,16 @@ const ResponsiveAppBar = () => {
     /** @ts-ignore */
     window.clearAll = function () {
       db.cards.clear();
+    };
+
+    /** @ts-ignore */
+    window.demoLogin = async function () {
+      await emailLogin('demo@gmail.com', '123456');
+    };
+
+    /** @ts-ignore */
+    window.userLogin = async function (email: string, password: string) {
+      await emailLogin(email, password);
     };
   }, []);
 
