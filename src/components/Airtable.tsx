@@ -82,20 +82,20 @@ const steps = [
 ];
 
 export default function Airtable() {
-  const [pending, setPending] = React.useState<boolean>(false);
   const [expand, setExpand] = React.useState<boolean>(false);
 
+  // setting
   const { error, setting, setSetting, syncFromAirtable } = useSetting();
 
   const [url, setUrl] = React.useState<string>('');
   const [key, setKey] = React.useState<string>('');
 
   React.useEffect(() => {
-    if (setting) {
-      setUrl(setting.airtable?.url || '');
-      setKey(setting.airtable?.key || '');
-    }
+    setUrl(setting.airtable?.url || '');
+    setKey(setting.airtable?.key || '');
   }, [setting]);
+
+  const [pending, setPending] = React.useState<boolean>(false);
 
   const set = async () => {
     setPending(true);
@@ -104,16 +104,17 @@ export default function Airtable() {
     setPending(false);
   };
 
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const handleStep = (input: number) => {
-    setActiveStep((prevActiveStep) => prevActiveStep + input);
-  };
-
   const sync = async () => {
     setPending(true);
     await syncFromAirtable();
     setPending(false);
+  };
+
+  // step
+  const [activeStep, setActiveStep] = React.useState(0);
+
+  const handleStep = (input: number) => {
+    setActiveStep((prevActiveStep) => prevActiveStep + input);
   };
 
   return (

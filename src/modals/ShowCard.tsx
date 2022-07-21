@@ -15,6 +15,7 @@ import { AppContext } from '../AppContext';
 import Divider from '../components/Divider';
 import { db, Card } from '../utils/index.db';
 import { speak } from '../utils/speak';
+import useSetting from '../hooks/useSetting';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -61,7 +62,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
   const [cards, setCards] = React.useState<Card[]>([]);
   const [answer, setAnswer] = React.useState<boolean>(false);
 
-  const setting = useLiveQuery(() => db.setting.get(1));
+  const { setting } = useSetting();
 
   const init = async () => {
     if (setting) {

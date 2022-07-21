@@ -12,12 +12,10 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 import { translate, langs } from '../utils/translate.js';
-// import { settingStorage } from '../utils/2setting.db';
 import { LanguageSelect } from '../components/LanguageSelect';
 import NewCard from '../modals/NewCard';
 import { speak } from '../utils/speak';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../utils/index.db';
+import useSetting from '../hooks/useSetting';
 
 export default function Home() {
   const appCtx = React.useContext(AppContext);
@@ -32,16 +30,15 @@ export default function Home() {
 
   const [hightLightText, setHightLightText] = React.useState<string>('');
   const [selectedWord, setSelectedWord] = React.useState<string>('');
-  // const [autoSpeech, setAutoSpeech] = React.useState<boolean>(false);
 
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
 
-  const setting = useLiveQuery(() => db.setting.get(1), [modalOpen]);
+  const { setting, setSetting } = useSetting();
 
   const getSelected = async () => {
-    const from = setting ? setting.homeTranslate.from : 'auto';
-    const to = setting ? setting.homeTranslate.to : 'en';
-    const autoSpeech = setting ? setting.homeTranslate.autoSpeech : false;
+    const from = setting.homeTranslate.from;
+    const to = setting.homeTranslate.to;
+    const autoSpeech = setting.homeTranslate.autoSpeech;
 
     const temp = window.getSelection();
     if (temp) {
@@ -58,9 +55,8 @@ export default function Home() {
   };
 
   const getTranslate = async () => {
-    const from = setting ? setting.homeTranslate.from : 'auto';
-    const to = setting ? setting.homeTranslate.to : 'en';
-    // const autoSpeech = setting ? setting.homeAutoSpeech : false;
+    const from = setting.homeTranslate.from;
+    const to = setting.homeTranslate.to;
 
     const { lang, text: textRes } = await translate(text, from, to);
 
@@ -80,9 +76,11 @@ export default function Home() {
     getTranslate();
   }, [text]);
 
-  const Speak = async () => {
-    const from = setting ? setting.homeTranslate.from : 'auto';
-    speak(text, detectFrom || from);
+  const Speak = async () => speak(text, detectFrom || setting.homeTranslate.from);
+
+  const autoSpeech = async () => {
+    setting.homeTranslate.autoSpeech = !setting.homeTranslate.autoSpeech;
+    await setSetting(setting);
   };
 
   return (
@@ -102,15 +100,7 @@ export default function Home() {
           variant="outlined"
           disabled={true}
         />
-        <IconButton
-          aria-label="delete"
-          onClick={async () => {
-            if (setting) {
-              setting.homeTranslate.autoSpeech = !setting.homeTranslate.autoSpeech;
-              await db.setting.put({ ...setting });
-            }
-          }}
-        >
+        <IconButton aria-label="delete" onClick={async () => autoSpeech}>
           {(setting ? setting.homeTranslate.autoSpeech : false) ? (
             <VolumeUpIcon />
           ) : (

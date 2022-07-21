@@ -25,6 +25,7 @@ import CardLanguageSelect from '../components/CardLanguageSelect';
 import AdditionalAction from '../components/AdditionalAction';
 import { db, Card } from '../utils/index.db';
 import { getLanguages } from '../utils/cardQuery';
+import useSetting from '../hooks/useSetting';
 
 export default function Index() {
   const appCtx = React.useContext(AppContext);
@@ -40,7 +41,7 @@ export default function Index() {
   const [currentCard, setCurrentCard] = React.useState<Card>();
   const [editedCard, setEditedCard] = React.useState<Card>();
 
-  const setting = useLiveQuery(() => db.setting.get(1));
+  const { setting } = useSetting();
 
   const cards = useLiveQuery(
     () =>
@@ -48,8 +49,8 @@ export default function Index() {
         .where('star')
         .between(range[0], range[1], true, true)
         .and((c) => (searchInput === '' ? true : c.origin.includes(searchInput)))
-        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
-        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .and((c) => c.from === setting.cardTranslate['from'])
+        .and((c) => c.to === setting.cardTranslate['to'])
         .offset(page * pageSize)
         .limit(pageSize)
         .sortBy('star'),
@@ -62,8 +63,8 @@ export default function Index() {
         .where('star')
         .between(range[0], range[1], true, true)
         .and((c) => (searchInput === '' ? true : c.origin.includes(searchInput)))
-        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
-        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .and((c) => c.from === setting.cardTranslate['from'])
+        .and((c) => c.to === setting.cardTranslate['to'])
         .count(),
     [page, setting, range, searchInput],
   );

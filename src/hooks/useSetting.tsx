@@ -2,6 +2,7 @@ import React from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import axios from 'axios';
 import queryString from 'query-string';
+import Airtable from 'airtable';
 
 import * as backendless from '../libs/backendless';
 import { useBackendless } from '../hooks/useBackendless';
@@ -20,6 +21,12 @@ const makeURL = (url: string) => {
   if (u.origin === 'https://api.airtable.com') return url;
   const s = u.pathname.split('/');
   return `https://api.airtable.com/v0/${s[1]}/${s[2]}`;
+};
+
+const check = (url: string): string[] => {
+  const u = new URL(url);
+  const s = u.pathname.split('/');
+  return [s[1], s[2]];
 };
 
 export default function useSetting() {
@@ -72,11 +79,8 @@ export default function useSetting() {
       const trueURL = makeURL(url);
       const cards = await db.cards.toArray();
 
-      const newRecord = cards
-        .filter((card) => !card.airtableId)
-        .map((card) => {
-          return { fields: { ...card, id: undefined } };
-        });
+      const newRecord = cards.filter((card) => !card.airtableId);
+
       const updateRecords = cards
         .filter((card) => !!card.airtableId)
         .map((card) => {
@@ -92,7 +96,11 @@ export default function useSetting() {
         const chunk = newRecord.slice(i, i + chunkSize);
         const { data } = await axios.post(
           trueURL,
-          { records: chunk },
+          {
+            records: chunk.map((card) => {
+              return { fields: { ...card, id: undefined } };
+            }),
+          },
           {
             headers: {
               Authorization: 'Bearer ' + key,
@@ -100,6 +108,15 @@ export default function useSetting() {
             },
           },
         );
+        chunk.map(async (card, index) => {
+          if (card.id) {
+            await db.cards.update(card.id, {
+              ...data.records[index].fields,
+              id: card.id,
+              airtableId: data.records[index].id,
+            });
+          }
+        });
         setProgressStep(Math.ceil(i / chunkSize));
         await sleep(210);
       }
@@ -117,11 +134,8 @@ export default function useSetting() {
           },
         );
         setProgressStep(Math.ceil((i + newRecord.length) / chunkSize));
-        await sleep(210);
       }
     }
-    setProgressStep(0);
-    setProgressMax(0);
   };
 
   const syncFromAirtable = async () => {
@@ -154,13 +168,9 @@ export default function useSetting() {
         init = false;
       }
 
-      totalRecords.map(async (record) => {
-        await db.cards.update(record.id, record);
-      });
-
       await db.cards.clear();
-      const sync = totalRecords.map((record) => {
-        db.cards.add({ ...record.fields, airtableId: record.id, id: undefined });
+      const sync = totalRecords.map(async (record) => {
+        await db.cards.add({ ...record.fields, airtableId: record.id, id: undefined });
       });
 
       await Promise.all(sync);

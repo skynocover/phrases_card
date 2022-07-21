@@ -8,37 +8,31 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import ProgressBar from '../modals/ProgressBar';
 import useSetting from '../hooks/useSetting';
 import { importFromXlsx, importFromJSON, export2JSON, export2Xlsx } from '../utils/import_export';
 
-const AdditionalAction = ({}: {}) => {
+const AdditionalAction = () => {
   const [expand, setExpand] = React.useState<boolean>(false);
 
-  const { setting, syncToAirtable } = useSetting();
-
-  const [open, setOpen] = React.useState(false);
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleToggle = () => {
-    setOpen(!open);
-  };
-
-  const sync = async () => {
-    setOpen(true);
-    setProgressOpen(true);
-    await syncToAirtable(setProgressStep, setProgressMax);
-    setProgressOpen(false);
-    setOpen(false);
-  };
-
+  // progress setting
   const [progressOpen, setProgressOpen] = React.useState<boolean>(false);
   const [progressStep, setProgressStep] = React.useState<number>(0);
   const [progressMax, setProgressMax] = React.useState<number>(0);
+
+  const { setting, syncToAirtable } = useSetting();
+
+  const sync = async () => {
+    try {
+      setProgressOpen(true);
+      setProgressStep(0);
+      await syncToAirtable(setProgressStep, setProgressMax);
+    } catch (error) {
+      console.log(error);
+    }
+    setProgressOpen(false);
+  };
 
   return (
     <Accordion expanded={expand} onChange={() => setExpand(!expand)}>
@@ -88,15 +82,7 @@ const AdditionalAction = ({}: {}) => {
         </div>
       </AccordionDetails>
 
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={open}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <ProgressBar
-        open={progressOpen}
-        closeModal={() => setProgressOpen(false)}
-        max={progressMax}
-        step={progressStep}
-      />
+      <ProgressBar open={progressOpen} max={progressMax} step={progressStep} />
     </Accordion>
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme, createTheme } from '@mui/material/styles';
 import { Paper } from '@mui/material';
@@ -10,7 +10,7 @@ import Login from './pages/Login';
 import Setting from './pages/Setting';
 import Header from './components/Header';
 import useSetting from './hooks/useSetting';
-import { useBackendless } from './hooks/useBackendless';
+import { BackendlessContext, useBackendless } from './hooks/useBackendless';
 
 const NotFound = () => {
   return <div>This is wrong way</div>;
@@ -23,8 +23,8 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const backendlessCtx = useContext(BackendlessContext);
   const { syncSetting } = useSetting();
-  const { currentUser } = useBackendless();
 
   // useBeforeunload(async (event) => {
   //   await syncDB.setSetting();
@@ -34,7 +34,7 @@ function App() {
 
   useEffect(() => {
     syncSetting();
-  }, [currentUser]);
+  }, [backendlessCtx.currentUser]);
 
   useEffect(() => {
     const handleTabClose = async (event: any) => {

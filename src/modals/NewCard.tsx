@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import Divider from '../components/Divider';
 import { db, Card } from '../utils/index.db';
+import useSetting from '../hooks/useSetting';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -46,8 +47,9 @@ export default function Index({
     setTranslate(translate);
   }, [translate]);
 
+  const { setting } = useSetting();
+
   const newCard = async () => {
-    const setting = await db.setting.get(1);
     const from = detectFrom ? detectFrom : setting ? setting.homeTranslate.from : 'auto';
     const to = setting ? setting.homeTranslate.to : 'zh-TW';
     const temp: Card = {

@@ -91,7 +91,6 @@ function useBackendless() {
   };
 
   return {
-    currentUser: ctx.currentUser,
     getCurrentUser,
     register,
     emailLogin,
@@ -101,4 +100,4 @@ function useBackendless() {
   };
 }
 
-export { BackendlessProvider, useBackendless };
+export { BackendlessProvider, BackendlessContext, useBackendless };

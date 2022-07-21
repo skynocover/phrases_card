@@ -35,8 +35,8 @@ const importFromXlsx = async (e: any) => {
 const importFromJSON = async (e: any) => {
   const file = e.target.files[0];
 
-  const exampleFileReader = new FileReader();
-  exampleFileReader.onload = async (e) => {
+  const fileReader = new FileReader();
+  fileReader.onload = async (e) => {
     const text = e?.target?.result;
     if (typeof text === 'string') {
       const cards = JSON.parse(text);
@@ -62,7 +62,7 @@ const importFromJSON = async (e: any) => {
       });
     }
   };
-  exampleFileReader.readAsText(file);
+  fileReader.readAsText(file);
 };
 
 const export2JSON = async () => {

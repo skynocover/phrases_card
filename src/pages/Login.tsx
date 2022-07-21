@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
 import useSetting from '../hooks/useSetting';
+import { BackendlessContext } from '../hooks/useBackendless';
 
 export default function Index(props: any) {
-  const { emailLogin, googleLogin, currentUser } = useBackendless();
+  const backendlessCtx = React.useContext(BackendlessContext);
+  const { emailLogin, googleLogin } = useBackendless();
   const { syncSetting } = useSetting();
   const navigate = useNavigate();
 
@@ -26,12 +28,10 @@ export default function Index(props: any) {
   };
 
   React.useEffect(() => {
-    if (currentUser) {
-      syncSetting().then(() => {
-        navigate('/');
-      });
+    if (backendlessCtx.currentUser) {
+      navigate('/');
     }
-  }, [currentUser]);
+  }, [backendlessCtx.currentUser]);
 
   return (
     <section className="flex flex-col items-center h-screen md:flex-row">

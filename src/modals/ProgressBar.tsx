@@ -1,45 +1,41 @@
 import React from 'react';
-import Slider from '@mui/material/Slider';
-import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 800,
-  backgroundColor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  color: 'white',
-  height: 150,
-};
+import Backdrop from '@mui/material/Backdrop';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function ProgressBar({
   max,
   step,
   open,
-  closeModal,
 }: {
   open: boolean;
-  closeModal: any;
   max: number;
   step: number;
 }) {
   return (
-    <Modal
-      open={open}
-      onClose={closeModal}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
-      <Box sx={style}>
-        <div className="flex items-center justify-center">
-          <Slider marks max={max} value={step} getAriaValueText={(v) => `${v}`} />
-        </div>
-      </Box>
-    </Modal>
+    <>
+      <Backdrop sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }} open={open}>
+        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+          <CircularProgress variant="determinate" value={Math.round((step / max) * 100)} />
+          <Box
+            sx={{
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              position: 'absolute',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography variant="caption" component="div" color="text.secondary">
+              {Math.round((step / max) * 100) + `%`}
+            </Typography>
+          </Box>
+        </Box>
+      </Backdrop>
+    </>
   );
 }

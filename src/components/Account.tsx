@@ -4,10 +4,11 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 
-import { useBackendless } from '../hooks/useBackendless';
+import { BackendlessContext } from '../hooks/useBackendless';
 
 export default function Account() {
-  const { currentUser } = useBackendless();
+  const backendlessCtx = React.useContext(BackendlessContext);
+
   return (
     <>
       <div className="grid w-[40rem] grid-cols-3">
@@ -19,7 +20,7 @@ export default function Account() {
             fullWidth={true}
             variant="outlined"
             margin="normal"
-            value={currentUser?.ownerId}
+            value={backendlessCtx.currentUser?.objectId}
           />
         </div>
         <Divider className="col-span-3" />
@@ -32,7 +33,7 @@ export default function Account() {
             fullWidth={true}
             variant="outlined"
             margin="normal"
-            value={currentUser?.email}
+            value={backendlessCtx.currentUser?.email}
           />
         </div>
         <Divider className="col-span-3" />
@@ -45,7 +46,8 @@ export default function Account() {
             fullWidth={true}
             variant="outlined"
             margin="normal"
-            value={currentUser?.name}
+            /** @ts-ignore */
+            value={backendlessCtx.currentUser?.name}
           />
         </div>
         <Divider className="col-span-3" />
@@ -58,7 +60,8 @@ export default function Account() {
             fullWidth={true}
             variant="outlined"
             margin="normal"
-            value={dayjs(currentUser?.created).format('YYYY-MM-DD')}
+            /** @ts-ignore */
+            value={dayjs(backendlessCtx.currentUser?.created).format('YYYY-MM-DD')}
           />
         </div>
       </div>

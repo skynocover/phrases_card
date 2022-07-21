@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
+import { BackendlessContext } from '../hooks/useBackendless';
 import { AppContext } from '../AppContext';
 import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
@@ -22,10 +23,11 @@ const pages = ['About', 'Cards'];
 
 const ResponsiveAppBar = () => {
   const appCtx = React.useContext(AppContext);
+  const backendlessCtx = React.useContext(BackendlessContext);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-  const { currentUser, getCurrentUser, emailLogin, logout } = useBackendless();
+  const { getCurrentUser, emailLogin, logout } = useBackendless();
   const { setting, setSetting } = useSetting();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -180,7 +182,7 @@ const ResponsiveAppBar = () => {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            {currentUser ? (
+            {backendlessCtx.currentUser ? (
               <>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>

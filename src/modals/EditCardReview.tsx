@@ -17,7 +17,9 @@ import InputAdornment from '@mui/material/InputAdornment';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { useLiveQuery } from 'dexie-react-hooks';
+
 import { db } from '../utils/index.db';
+import useSetting from '../hooks/useSetting';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -36,7 +38,12 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
   const [reviewNumber, setReviewNumber] = React.useState<number>(0);
   const [probability, setProbability] = React.useState<number[]>([]);
 
-  const setting = useLiveQuery(() => db.setting.get(1), [open]);
+  const { setting, setSetting } = useSetting();
+
+  React.useEffect(() => {
+    setReviewNumber(setting.review.reviewNumber);
+    setProbability(setting.review.probability);
+  }, [setting]);
 
   const cardCount = useLiveQuery(async () => {
     let temp = [];
@@ -44,20 +51,13 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
       const count = await db.cards
         .where('star')
         .equals(i)
-        .and((c) => c.from === (setting ? setting.cardTranslate['from'] : 'en'))
-        .and((c) => c.to === (setting ? setting.cardTranslate['to'] : 'zh-TW'))
+        .and((c) => c.from === setting.cardTranslate['from'])
+        .and((c) => c.to === setting.cardTranslate['to'])
         .count();
       temp.push(count);
     }
 
     return temp;
-  }, [setting]);
-
-  React.useEffect(() => {
-    if (setting) {
-      setReviewNumber(setting.review.reviewNumber);
-      setProbability(setting.review.probability);
-    }
   }, [setting]);
 
   const changeProbability = (index: number, input: number) => {
@@ -71,11 +71,14 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
     setProbability(temp);
   };
 
-  const setSetting = async () => {
-    if (setting) {
-      await db.setting.put({ ...setting, review: { reviewNumber, probability } });
-    }
+  const Setting = async () => {
+    await setSetting({ ...setting, review: { reviewNumber, probability } });
     closeModal();
+  };
+
+  const autoSpeech = async () => {
+    setting.cardTranslate.autoSpeech = !setting.cardTranslate.autoSpeech;
+    await setSetting({ ...setting });
   };
 
   return (
@@ -103,15 +106,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
                 <div className="flex items-center">
                   <Typography variant="h6">Auto speak</Typography>
 
-                  <IconButton
-                    aria-label="delete"
-                    onClick={async () => {
-                      if (setting) {
-                        setting.cardTranslate.autoSpeech = !setting.cardTranslate.autoSpeech;
-                        await db.setting.put({ ...setting });
-                      }
-                    }}
-                  >
+                  <IconButton aria-label="delete" onClick={autoSpeech}>
                     {(setting ? setting.cardTranslate.autoSpeech : false) ? (
                       <VolumeUpIcon />
                     ) : (
@@ -178,7 +173,7 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
                   Setting Fail
                 </Button>
               ) : (
-                <Button variant="contained" onClick={setSetting}>
+                <Button variant="contained" onClick={Setting}>
                   Setting
                 </Button>
               )}
