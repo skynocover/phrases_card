@@ -1,4 +1,5 @@
 import { useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Paper } from '@mui/material';
@@ -13,7 +14,12 @@ import useSetting from './hooks/useSetting';
 import { BackendlessContext } from './hooks/useBackendless';
 
 const NotFound = () => {
-  return <div>This is wrong way</div>;
+  return (
+    <>
+      <div>This is wrong way</div>
+      <Link to="/">Go back home by clicking here</Link>
+    </>
+  );
 };
 
 const darkTheme = createTheme({
