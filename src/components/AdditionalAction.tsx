@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -13,6 +14,14 @@ import ProgressBar from '../modals/ProgressBar';
 import useSetting from '../hooks/useSetting';
 import { importFromXlsx, importFromJSON, export2JSON, export2Xlsx } from '../utils/import_export';
 
+const GotoSetAirtable = () => {
+  return (
+    <Link to={{ pathname: '/setting', hash: '#airtable' }}>
+      <Button variant="contained">airtable</Button>
+    </Link>
+  );
+};
+
 const AdditionalAction = () => {
   const [expand, setExpand] = React.useState<boolean>(false);
 
@@ -21,15 +30,52 @@ const AdditionalAction = () => {
   const [progressStep, setProgressStep] = React.useState<number>(0);
   const [progressMax, setProgressMax] = React.useState<number>(0);
 
-  const { setting, syncToAirtable } = useSetting();
+  const { setting, clearAllCards, exportToAirtable, importFromAirtable } = useSetting();
 
-  const sync = async () => {
+  const exportAirtable = async () => {
     try {
-      setProgressOpen(true);
-      setProgressStep(0);
-      await syncToAirtable(setProgressStep, setProgressMax);
-    } catch (error) {
-      console.log(error);
+      const result = await Swal.fire({
+        title: 'It only creates cards into airtable',
+        text: 'Nothing will be updated',
+        showDenyButton: true,
+        confirmButtonText: 'Yes, I know',
+        denyButtonText: 'Let me think about it',
+      });
+
+      if (result.isConfirmed) {
+        setProgressOpen(true);
+        setProgressStep(0);
+        await exportToAirtable(setProgressStep, setProgressMax);
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+
+    setProgressOpen(false);
+  };
+
+  const importAirtable = async () => {
+    try {
+      const result = await Swal.fire({
+        title: 'Would you like to clear all cards before importing?',
+        text: 'Cards in local will be cleared',
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Yes, clear it all',
+        denyButtonText: 'No, just import',
+      });
+
+      if (result.isConfirmed) {
+        setProgressOpen(true);
+        await clearAllCards();
+        await importFromAirtable();
+      }
+      if (result.isDenied) {
+        setProgressOpen(true);
+        await importFromAirtable();
+      }
+    } catch (error: any) {
+      console.log(error.message);
     }
     setProgressOpen(false);
   };
@@ -44,31 +90,21 @@ const AdditionalAction = () => {
         <Typography>Additional action</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <div className="flex items-center justify-around space-x-2">
-          {setting.airtable ? (
-            <>
-              <Button variant="contained" onClick={sync}>
-                Sync to airtable
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link to={{ pathname: '/setting', hash: '#airtable' }}>
-                <Button variant="contained">Go to set airtable</Button>
-              </Link>
-            </>
-          )}
-        </div>
-        <div className="flex items-center justify-center mt-3 space-x-2">
-          <Typography>Export as </Typography>
+        <div className="flex items-center justify-center mt-2 space-x-2">
+          <Typography>Export </Typography>
           <ButtonGroup variant="outlined">
             <Button onClick={export2JSON}>JSON</Button>
             <Button onClick={export2Xlsx}>Xlsx</Button>
+            {setting.airtable ? (
+              <Button onClick={exportAirtable}>airtable</Button>
+            ) : (
+              <GotoSetAirtable />
+            )}
           </ButtonGroup>
         </div>
 
         <div className="flex items-center justify-center mt-3 space-x-2">
-          <Typography>Import from </Typography>
+          <Typography>Import </Typography>
           <ButtonGroup variant="outlined">
             <Button component="label">
               JSON
@@ -78,6 +114,11 @@ const AdditionalAction = () => {
               Xlsx
               <input hidden type="file" onChange={importFromXlsx} />
             </Button>
+            {setting.airtable ? (
+              <Button onClick={importAirtable}>airtable</Button>
+            ) : (
+              <GotoSetAirtable />
+            )}
           </ButtonGroup>
         </div>
       </AccordionDetails>

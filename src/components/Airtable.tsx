@@ -85,7 +85,7 @@ export default function Airtable() {
   const [expand, setExpand] = React.useState<boolean>(false);
 
   // setting
-  const { error, setting, setSetting, syncFromAirtable } = useSetting();
+  const { error, setting, setSetting } = useSetting();
 
   const [url, setUrl] = React.useState<string>('');
   const [key, setKey] = React.useState<string>('');
@@ -101,12 +101,6 @@ export default function Airtable() {
     setPending(true);
     const newSetting = { ...setting, airtable: { url, key } };
     await setSetting(newSetting);
-    setPending(false);
-  };
-
-  const sync = async () => {
-    setPending(true);
-    await syncFromAirtable();
     setPending(false);
   };
 
@@ -144,10 +138,7 @@ export default function Airtable() {
         />
       </div>
 
-      <div className="flex justify-between col-span-2 mt-2">
-        <Button variant="outlined" disabled={!setting.airtable} onClick={sync}>
-          Sync cards from airtable
-        </Button>
+      <div className="flex justify-end col-span-2 mt-2">
         <Button variant="contained" onClick={set}>
           Setting
         </Button>

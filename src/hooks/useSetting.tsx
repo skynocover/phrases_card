@@ -1,10 +1,8 @@
 import React from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import axios from 'axios';
-import queryString from 'query-string';
-import Airtable from 'airtable';
 
 import * as backendless from '../libs/backendless';
+import { Airtable, getBaseAndTable } from '../libs/airtable';
 import { useBackendless } from '../hooks/useBackendless';
 import { db, Card, Setting } from '../utils/index.db';
 
@@ -16,24 +14,13 @@ const defaultSetting: Setting = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const makeURL = (url: string) => {
-  const u = new URL(url);
-  if (u.origin === 'https://api.airtable.com') return url;
-  const s = u.pathname.split('/');
-  return `https://api.airtable.com/v0/${s[1]}/${s[2]}`;
-};
-
-const check = (url: string): string[] => {
-  const u = new URL(url);
-  const s = u.pathname.split('/');
-  return [s[1], s[2]];
-};
-
 export default function useSetting() {
   const [error, setError] = React.useState<Error>();
 
   const setting = useLiveQuery(() => db.setting.get(1)) || defaultSetting;
   const { getCurrentUser } = useBackendless();
+
+  const clearAllCards = async () => await db.cards.clear();
 
   const syncSetting = async () => {
     try {
@@ -69,106 +56,45 @@ export default function useSetting() {
     }
   };
 
-  const syncToAirtable = async (
+  const exportToAirtable = async (
     setProgressStep: React.Dispatch<React.SetStateAction<number>>,
     setProgressMax: React.Dispatch<React.SetStateAction<number>>,
   ) => {
     const airtable = setting.airtable;
     if (airtable) {
       const { url, key } = airtable;
-      const trueURL = makeURL(url);
+      const { baseId, tableId } = getBaseAndTable(url);
+      const base = new Airtable(key, baseId, tableId);
+
       const cards = await db.cards.toArray();
 
-      const newRecord = cards.filter((card) => !card.airtableId);
-
-      const updateRecords = cards
-        .filter((card) => !!card.airtableId)
-        .map((card) => {
-          return { fields: { ...card, airtableId: undefined, id: undefined }, id: card.airtableId };
-        });
-
       const chunkSize = 10;
-      setProgressMax(
-        Math.ceil(newRecord.length / chunkSize) + Math.ceil(updateRecords.length / chunkSize),
-      );
+      setProgressMax(Math.ceil(cards.length / chunkSize));
 
-      for (let i = 0; i < newRecord.length; i += chunkSize) {
-        const chunk = newRecord.slice(i, i + chunkSize);
-        const { data } = await axios.post(
-          trueURL,
-          {
-            records: chunk.map((card) => {
-              return { fields: { ...card, id: undefined } };
-            }),
-          },
-          {
-            headers: {
-              Authorization: 'Bearer ' + key,
-              'Content-Type': 'application/json',
-            },
-          },
+      for (let i = 0; i < cards.length; i += chunkSize) {
+        const chunk = cards.slice(i, i + chunkSize);
+
+        await base.createRecords(
+          chunk.map((card) => {
+            return { fields: { ...card, id: undefined } };
+          }),
         );
-        chunk.map(async (card, index) => {
-          if (card.id) {
-            await db.cards.update(card.id, {
-              ...data.records[index].fields,
-              id: card.id,
-              airtableId: data.records[index].id,
-            });
-          }
-        });
+
         setProgressStep(Math.ceil(i / chunkSize));
         await sleep(210);
-      }
-
-      for (let i = 0; i < updateRecords.length; i += chunkSize) {
-        const chunk = updateRecords.slice(i, i + chunkSize);
-        const { data } = await axios.patch(
-          trueURL,
-          { records: chunk },
-          {
-            headers: {
-              Authorization: 'Bearer ' + key,
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-        setProgressStep(Math.ceil((i + newRecord.length) / chunkSize));
       }
     }
   };
 
-  const syncFromAirtable = async () => {
+  const importFromAirtable = async () => {
     const airtable = setting.airtable;
     if (airtable) {
       const { url, key } = airtable;
-      const trueURL = makeURL(url);
+      const { baseId, tableId } = getBaseAndTable(url);
+      const base = new Airtable(key, baseId, tableId);
 
-      const tempURL = '';
-      const parsed = queryString.parse(tempURL);
+      const totalRecords = await base.getAllRecords();
 
-      parsed.pageSize = '10';
-
-      let init = true;
-
-      let newOffset = '';
-      let totalRecords: any[] = [];
-      while (init || newOffset) {
-        newOffset && (parsed.offset = newOffset);
-        const url = trueURL + '?' + queryString.stringify(parsed);
-
-        const { data } = await axios.get(url, {
-          headers: { Authorization: 'Bearer ' + key },
-        });
-        await sleep(210);
-
-        let { records, offset } = data;
-        newOffset = offset;
-        totalRecords = totalRecords.concat(records);
-        init = false;
-      }
-
-      await db.cards.clear();
       const sync = totalRecords.map(async (record) => {
         await db.cards.add({ ...record.fields, airtableId: record.id, id: undefined });
       });
@@ -177,5 +103,13 @@ export default function useSetting() {
     }
   };
 
-  return { error, setting, syncSetting, setSetting, syncToAirtable, syncFromAirtable };
+  return {
+    error,
+    clearAllCards,
+    setting,
+    syncSetting,
+    setSetting,
+    exportToAirtable,
+    importFromAirtable,
+  };
 }

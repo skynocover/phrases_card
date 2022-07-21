@@ -1,9 +1,7 @@
 import Dexie, { Table } from 'dexie';
 
 export interface Card {
-  objectId?: number;
   id?: number;
-  airtableId?: string;
   origin: string;
   translate: string;
   sentence: string;
