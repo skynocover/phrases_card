@@ -45,7 +45,7 @@ export default function Index(props: any) {
 
       <div className="flex items-center justify-center w-full h-screen px-6 md:max-w-md lg:max-w-full md:mx-0 md:w-1/2 xl:w-1/3 lg:px-16 xl:px-12">
         <div className="w-full h-100">
-          <h1 className="mt-12 text-xl font-bold leading-tight md:text-2xl">PhraseCards</h1>
+          <h1 className="mt-12 text-xl font-bold leading-tight md:text-2xl">Phrase Pitcher</h1>
 
           <hr className="w-full my-6 border-gray-300" />
 
