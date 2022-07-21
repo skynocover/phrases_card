@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Setting from './pages/Setting';
 import Header from './components/Header';
 import useSetting from './hooks/useSetting';
+import { useBackendless } from './hooks/useBackendless';
 
 const NotFound = () => {
   return <div>This is wrong way</div>;
@@ -23,18 +24,19 @@ const darkTheme = createTheme({
 
 function App() {
   const { syncSetting } = useSetting();
-  const init = async () => {
-    try {
-      await syncSetting();
-    } catch (error) {}
-  };
+  const { currentUser } = useBackendless();
+
   // useBeforeunload(async (event) => {
   //   await syncDB.setSetting();
   //   event.preventDefault();
   //   event.returnValue = false;
   // });
+
   useEffect(() => {
-    init();
+    syncSetting();
+  }, [currentUser]);
+
+  useEffect(() => {
     const handleTabClose = async (event: any) => {
       // event.preventDefault();
       // event.returnValue = false;

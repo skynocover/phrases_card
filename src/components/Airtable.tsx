@@ -99,7 +99,6 @@ export default function Airtable() {
 
   const set = async () => {
     setPending(true);
-
     const newSetting = { ...setting, airtable: { url, key } };
     await setSetting(newSetting);
     setPending(false);

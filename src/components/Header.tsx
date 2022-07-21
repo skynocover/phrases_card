@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { AppContext } from '../AppContext';
 import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
+import useSetting from '../hooks/useSetting';
 import { db, Card } from '../utils/index.db';
 
 const pages = ['About', 'Cards'];
@@ -25,6 +26,7 @@ const ResponsiveAppBar = () => {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const { currentUser, getCurrentUser, emailLogin, logout } = useBackendless();
+  const { setting, setSetting } = useSetting();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -110,6 +112,8 @@ const ResponsiveAppBar = () => {
   };
 
   const userLogout = async () => {
+    await db.setting.update(1, { ...setting, airtable: undefined });
+    await db.cards.clear();
     await logout();
     await firebase.logout();
   };
@@ -131,6 +135,11 @@ const ResponsiveAppBar = () => {
     /** @ts-ignore */
     window.userLogin = async function (email: string, password: string) {
       await emailLogin(email, password);
+    };
+
+    /** @ts-ignore */
+    window.setSetting = async function () {
+      await setSetting();
     };
   }, []);
 

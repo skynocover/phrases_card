@@ -4,6 +4,7 @@ import axios from 'axios';
 import queryString from 'query-string';
 
 import * as backendless from '../libs/backendless';
+import { useBackendless } from '../hooks/useBackendless';
 import { db, Card, Setting } from '../utils/index.db';
 
 const defaultSetting: Setting = {
@@ -25,11 +26,13 @@ export default function useSetting() {
   const [error, setError] = React.useState<Error>();
 
   const setting = useLiveQuery(() => db.setting.get(1)) || defaultSetting;
+  const { getCurrentUser } = useBackendless();
 
   const syncSetting = async () => {
     try {
       const localSetting = await db.setting.get(1);
       const remoteSetting: any = await backendless.getSetting();
+      console.log({ localSetting, remoteSetting });
       if (remoteSetting && localSetting) {
         return await db.setting.update(1, remoteSetting);
       }
@@ -39,6 +42,12 @@ export default function useSetting() {
       if (!localSetting) {
         await db.setting.add(defaultSetting);
       }
+      const currentUser = await getCurrentUser();
+      await db.setting.update(1, {
+        ...(await db.setting.get(1)),
+        objectId: remoteSetting?.objectId, //check if remoteSetting is exist
+        ownerId: currentUser?.objectId, //sync the userId
+      });
     } catch (error: any) {
       setError(error);
     }
@@ -46,6 +55,7 @@ export default function useSetting() {
 
   const setSetting = async (inputSetting?: Setting) => {
     try {
+      db.setting.update(1, inputSetting ? inputSetting : setting);
       await backendless.setSetting(inputSetting ? inputSetting : setting);
     } catch (error: any) {
       setError(error);

@@ -16,6 +16,7 @@ export interface Card {
 
 export interface Setting {
   objectId?: string;
+  ownerId?: string;
   homeTranslate: translateSetting;
   cardTranslate: translateSetting;
   review: reviewSetting;

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Backendless from 'backendless';
 
 interface BackendlessContextProps {
-  currentUser: any;
-  setCurrentUser: React.Dispatch<React.SetStateAction<any>>;
+  currentUser: Backendless.User | undefined;
+  setCurrentUser: React.Dispatch<React.SetStateAction<Backendless.User | undefined>>;
 }
 
 const BackendlessContext = React.createContext<BackendlessContextProps>(undefined!);
@@ -50,16 +50,10 @@ function useBackendless() {
 
   const ctx = React.useContext(BackendlessContext);
 
-  React.useEffect(() => {
-    // Backendless.UserService.getCurrentUser().then((user) => {
-    //   setCurrentUser(user);
-    // });
-  }, []);
-
   const getCurrentUser = async () => {
     const user = await Backendless.UserService.getCurrentUser();
-    console.log({ user });
     ctx.setCurrentUser(user);
+    return user;
   };
 
   const register = async (email: string, password: string) => {
