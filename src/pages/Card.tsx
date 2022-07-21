@@ -16,7 +16,6 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { AppContext } from '../AppContext';
 import ShowCard from '../modals/ShowCard';
 import DeleteCard from '../modals/DeleteCard';
 import EditCard from '../modals/EditCard';
@@ -28,8 +27,6 @@ import { getLanguages } from '../utils/cardQuery';
 import useSetting from '../hooks/useSetting';
 
 export default function Index() {
-  const appCtx = React.useContext(AppContext);
-
   const pageSize = 10;
   const [page, setPage] = React.useState<number>(0);
   const [searchInput, setSearchInput] = React.useState<string>('');

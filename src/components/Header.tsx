@@ -13,7 +13,6 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
 import { BackendlessContext } from '../hooks/useBackendless';
-import { AppContext } from '../AppContext';
 import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
 import useSetting from '../hooks/useSetting';
@@ -22,7 +21,6 @@ import { db, Card } from '../utils/index.db';
 const pages = ['About', 'Cards'];
 
 const ResponsiveAppBar = () => {
-  const appCtx = React.useContext(AppContext);
   const backendlessCtx = React.useContext(BackendlessContext);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);

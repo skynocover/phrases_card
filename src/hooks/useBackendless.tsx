@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Backendless from 'backendless';
 
 interface BackendlessContextProps {
@@ -14,7 +14,7 @@ interface BackendlessProviderProps {
 }
 
 const BackendlessProvider = ({ subDomain, children }: BackendlessProviderProps) => {
-  const [currentUser, setCurrentUser] = useState<Backendless.User | undefined>();
+  const [currentUser, setCurrentUser] = React.useState<Backendless.User | undefined>();
 
   const init = async () => {
     try {
@@ -46,7 +46,7 @@ const BackendlessProvider = ({ subDomain, children }: BackendlessProviderProps) 
 };
 
 function useBackendless() {
-  const [error, setError] = useState<Error>();
+  const [error, setError] = React.useState<Error>();
 
   const ctx = React.useContext(BackendlessContext);
 

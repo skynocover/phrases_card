@@ -9,9 +9,7 @@ import Slider from '@mui/material/Slider';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import IconButton from '@mui/material/IconButton';
-import { useLiveQuery } from 'dexie-react-hooks';
 
-import { AppContext } from '../AppContext';
 import Divider from '../components/Divider';
 import { db, Card } from '../utils/index.db';
 import { speak } from '../utils/speak';

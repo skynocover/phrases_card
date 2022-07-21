@@ -3,18 +3,12 @@ import { useNavigate } from 'react-router-dom';
 
 import * as firebase from '../libs/firebase';
 import { useBackendless } from '../hooks/useBackendless';
-import useSetting from '../hooks/useSetting';
 import { BackendlessContext } from '../hooks/useBackendless';
 
 export default function Index(props: any) {
   const backendlessCtx = React.useContext(BackendlessContext);
-  const { emailLogin, googleLogin } = useBackendless();
-  const { syncSetting } = useSetting();
+  const { googleLogin } = useBackendless();
   const navigate = useNavigate();
-
-  const demoLogin = async () => {
-    await emailLogin('demo@gmail.com', '123456');
-  };
 
   const gLogin = async () => {
     try {

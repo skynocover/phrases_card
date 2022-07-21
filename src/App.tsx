@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { ThemeProvider, useTheme, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Paper } from '@mui/material';
 
 import Home from './pages/Home';
@@ -10,7 +10,7 @@ import Login from './pages/Login';
 import Setting from './pages/Setting';
 import Header from './components/Header';
 import useSetting from './hooks/useSetting';
-import { BackendlessContext, useBackendless } from './hooks/useBackendless';
+import { BackendlessContext } from './hooks/useBackendless';
 
 const NotFound = () => {
   return <div>This is wrong way</div>;
@@ -26,28 +26,9 @@ function App() {
   const backendlessCtx = useContext(BackendlessContext);
   const { syncSetting } = useSetting();
 
-  // useBeforeunload(async (event) => {
-  //   await syncDB.setSetting();
-  //   event.preventDefault();
-  //   event.returnValue = false;
-  // });
-
   useEffect(() => {
     syncSetting();
   }, [backendlessCtx.currentUser]);
-
-  useEffect(() => {
-    const handleTabClose = async (event: any) => {
-      // event.preventDefault();
-      // event.returnValue = false;
-      // await syncDB.setSetting();
-      return;
-    };
-    window.addEventListener('beforeunload', handleTabClose);
-    return () => {
-      window.removeEventListener('beforeunload', handleTabClose);
-    };
-  }, []);
 
   return (
     <ThemeProvider theme={darkTheme}>

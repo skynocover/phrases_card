@@ -1,6 +1,5 @@
 import React from 'react';
 import TextField from '@mui/material/TextField';
-import { AppContext } from '../AppContext';
 
 import { styled } from '@mui/material/styles';
 import MuiGrid from '@mui/material/Grid';
@@ -18,8 +17,6 @@ import { speak } from '../utils/speak';
 import useSetting from '../hooks/useSetting';
 
 export default function Home() {
-  const appCtx = React.useContext(AppContext);
-
   // 原文
   const [text, setText] = React.useState<string>('');
   // 翻譯
