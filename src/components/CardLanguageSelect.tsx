@@ -7,8 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 
 import { langs } from '../utils/translate.js';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../utils/index.db';
+import useSetting from '../hooks/useSetting';
 
 export default function CardLanguageSelect({
   settingName,
@@ -19,7 +18,14 @@ export default function CardLanguageSelect({
 }) {
   const [expand, setExpand] = React.useState<boolean>(false);
 
-  const setting = useLiveQuery(() => db.setting.get(1), [expand]);
+  const { setting, setSetting } = useSetting();
+
+  const changeLanguage = async (item: string) => {
+    setting.cardTranslate[settingName] = item;
+    setSetting(setting);
+
+    setExpand(false);
+  };
 
   return (
     <Accordion expanded={expand} onChange={() => setExpand(!expand)}>
@@ -29,7 +35,7 @@ export default function CardLanguageSelect({
         id="panel1a-header"
       >
         {/** @ts-ignore */}
-        <Typography>{langs[setting ? setting.cardTranslate[settingName] : 'en']}</Typography>
+        <Typography>{langs[setting.cardTranslate[settingName]]}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <div className="grid gap-2 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2">
@@ -39,25 +45,11 @@ export default function CardLanguageSelect({
               return (
                 <div
                   className={`flex justify-center item-center ${
-                    item === (setting ? setting.cardTranslate[settingName] : 'en') &&
-                    'border border-slate-400'
+                    item === setting.cardTranslate[settingName] && 'border border-slate-400'
                   }`}
                   key={index}
                 >
-                  <Button
-                    key={index}
-                    variant="text"
-                    onClick={() => {
-                      if (setting) {
-                        setting.cardTranslate[settingName] = item;
-                        db.setting.put({
-                          ...setting,
-                          cardTranslate: { ...setting.cardTranslate },
-                        });
-                      }
-                      setExpand(false);
-                    }}
-                  >
+                  <Button key={index} variant="text" onClick={() => changeLanguage(item)}>
                     {/** @ts-ignore */}
                     {langs[item]}
                   </Button>

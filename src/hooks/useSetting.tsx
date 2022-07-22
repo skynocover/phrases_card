@@ -26,7 +26,6 @@ export default function useSetting() {
     try {
       const localSetting = await db.setting.get(1);
       const remoteSetting: any = await backendless.getSetting();
-      console.log({ localSetting, remoteSetting });
       if (remoteSetting && localSetting) {
         return await db.setting.update(1, remoteSetting);
       }
@@ -49,7 +48,7 @@ export default function useSetting() {
 
   const setSetting = async (inputSetting?: Setting) => {
     try {
-      db.setting.update(1, inputSetting ? inputSetting : setting);
+      await db.setting.update(1, inputSetting ? inputSetting : setting);
       await backendless.setSetting(inputSetting ? inputSetting : setting);
     } catch (error: any) {
       setError(error);

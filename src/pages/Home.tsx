@@ -66,7 +66,6 @@ export default function Home() {
     } else {
       setDetectLabel(undefined);
     }
-    // setAutoSpeech(autoSpeechSetting);
   };
 
   React.useEffect(() => {
@@ -97,7 +96,7 @@ export default function Home() {
           variant="outlined"
           disabled={true}
         />
-        <IconButton aria-label="delete" onClick={async () => autoSpeech}>
+        <IconButton aria-label="delete" onClick={autoSpeech}>
           {(setting ? setting.homeTranslate.autoSpeech : false) ? (
             <VolumeUpIcon />
           ) : (

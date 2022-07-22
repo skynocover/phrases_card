@@ -7,10 +7,9 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
-import { useLiveQuery } from 'dexie-react-hooks';
 
 import { langs } from '../utils/translate.js';
-import { db } from '../utils/index.db';
+import useSetting from '../hooks/useSetting';
 
 const LanguageSelect = ({
   settingName,
@@ -23,7 +22,14 @@ const LanguageSelect = ({
   const [filter, setFilter] = React.useState<string>('');
   const [expand, setExpand] = React.useState<boolean>(false);
 
-  const setting = useLiveQuery(() => db.setting.get(1), [expand]);
+  const { setting, setSetting } = useSetting();
+
+  const changeLanguage = async (item: string) => {
+    setting.homeTranslate[settingName] = item;
+    setSetting(setting);
+
+    setExpand(false);
+  };
 
   return (
     <Accordion expanded={expand} onChange={() => setExpand(!expand)}>
@@ -33,7 +39,7 @@ const LanguageSelect = ({
         id="panel1a-header"
       >
         {/** @ts-ignore */}
-        <Typography>{langs[setting ? setting.homeTranslate[settingName] : 'en']}</Typography>
+        <Typography>{langs[setting.homeTranslate[settingName]]}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <div className="mb-2">
@@ -58,26 +64,11 @@ const LanguageSelect = ({
               return (
                 <div
                   className={`flex justify-center item-center ${
-                    item === (setting ? setting.homeTranslate[settingName] : 'en') &&
-                    'border border-slate-400'
+                    item === setting.homeTranslate[settingName] && 'border border-slate-400'
                   }`}
                   key={index}
                 >
-                  <Button
-                    key={index}
-                    variant="text"
-                    onClick={async () => {
-                      if (setting) {
-                        setting.homeTranslate[settingName] = item;
-                        db.setting.put({
-                          ...setting,
-                          homeTranslate: { ...setting.homeTranslate },
-                        });
-                      }
-
-                      setExpand(false);
-                    }}
-                  >
+                  <Button key={index} variant="text" onClick={() => changeLanguage(item)}>
                     {/** @ts-ignore */}
                     {langs[item]}
                   </Button>

@@ -1,6 +1,7 @@
 import Backendless from 'backendless';
+import { Setting } from '../utils/index.db';
 
-const setSetting = async (localSetting: any) => {
+const setSetting = async (localSetting: Setting) => {
   const setting: any = await getSetting();
 
   if (setting) {

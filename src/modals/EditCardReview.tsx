@@ -76,9 +76,9 @@ export default function Index({ open, closeModal }: { open: boolean; closeModal:
     closeModal();
   };
 
-  const autoSpeech = async () => {
+  const autoSpeech = () => {
     setting.cardTranslate.autoSpeech = !setting.cardTranslate.autoSpeech;
-    await setSetting({ ...setting });
+    setSetting(setting);
   };
 
   return (
