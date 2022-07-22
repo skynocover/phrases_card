@@ -2,13 +2,13 @@ import Backendless from 'backendless';
 import { Setting } from '../utils/index.db';
 
 const setSetting = async (localSetting: Setting) => {
-  const setting: any = await getSetting();
-
-  if (setting) {
-    localSetting.objectId = setting.objectId;
+  const res = await Backendless.Data.of('user_setting').save(localSetting);
+  if (res && res.objectId) {
+    localSetting.objectId = res.objectId;
+    await Backendless.Data.of('user_setting').save(localSetting);
   }
 
-  return await Backendless.Data.of('user_setting').save(localSetting);
+  return;
 };
 
 const getSetting = async () => {
