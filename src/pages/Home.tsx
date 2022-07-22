@@ -90,7 +90,7 @@ export default function Home() {
         sentence={text}
         detectFrom={detectFrom}
       />
-      <div className="flex mt-2">
+      <div className="flex items-center mt-2">
         <TextField
           value={selectedWord}
           label={!!selectedWord ? '' : 'Highlight Some Text'}
@@ -104,7 +104,7 @@ export default function Home() {
             <VolumeOffIcon />
           )}
         </IconButton>
-        <Button variant="contained" onClick={() => selectedWord && setModalOpen(true)}>
+        <Button variant="contained" size="large" onClick={() => selectedWord && setModalOpen(true)}>
           Create New Card
         </Button>
       </div>
