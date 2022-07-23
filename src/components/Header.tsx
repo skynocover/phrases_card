@@ -113,7 +113,6 @@ const ResponsiveAppBar = () => {
 
   const userLogout = async () => {
     await db.setting.update(1, { ...setting, airtable: undefined });
-    await db.cards.clear();
     await logout();
     await firebase.logout();
   };

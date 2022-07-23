@@ -17,7 +17,7 @@ import { importFromXlsx, importFromJSON, export2JSON, export2Xlsx } from '../uti
 const GotoSetAirtable = () => {
   return (
     <Link to={{ pathname: '/setting', hash: '#airtable' }}>
-      <Button variant="contained">airtable</Button>
+      <Button>airtable</Button>
     </Link>
   );
 };
@@ -35,8 +35,7 @@ const AdditionalAction = () => {
   const exportAirtable = async () => {
     try {
       const result = await Swal.fire({
-        title: 'It only creates cards into airtable',
-        text: 'Nothing will be updated',
+        title: 'It will creates cards into airtable',
         showDenyButton: true,
         confirmButtonText: 'Yes, I know',
         denyButtonText: 'Let me think about it',
@@ -48,9 +47,13 @@ const AdditionalAction = () => {
         await exportToAirtable(setProgressStep, setProgressMax);
       }
     } catch (error: any) {
-      console.log(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Export airtable error',
+        text: 'The url or key for airtable may be wrong',
+      });
+      console.log(error);
     }
-
     setProgressOpen(false);
   };
 
@@ -61,21 +64,26 @@ const AdditionalAction = () => {
         text: 'Cards in local will be cleared',
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes, clear it all',
-        denyButtonText: 'No, just import',
+        confirmButtonText: 'No, just import',
+        denyButtonText: 'Yes, clear it all',
       });
 
       if (result.isConfirmed) {
         setProgressOpen(true);
-        await clearAllCards();
         await importFromAirtable();
       }
       if (result.isDenied) {
         setProgressOpen(true);
+        await clearAllCards();
         await importFromAirtable();
       }
     } catch (error: any) {
-      console.log(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Export airtable error',
+        text: 'The url or key for airtable may be wrong',
+      });
+      console.log(error);
     }
     setProgressOpen(false);
   };
@@ -95,7 +103,7 @@ const AdditionalAction = () => {
           <ButtonGroup variant="outlined">
             <Button onClick={export2JSON}>JSON</Button>
             <Button onClick={export2Xlsx}>Xlsx</Button>
-            {setting.airtable ? (
+            {setting.airtable?.url && setting.airtable?.key ? (
               <Button onClick={exportAirtable}>airtable</Button>
             ) : (
               <GotoSetAirtable />
@@ -103,7 +111,7 @@ const AdditionalAction = () => {
           </ButtonGroup>
         </div>
 
-        <div className="flex items-center justify-center mt-3 space-x-2">
+        <div className="flex items-center justify-center mt-2 space-x-2">
           <Typography>Import </Typography>
           <ButtonGroup variant="outlined">
             <Button component="label">
@@ -114,7 +122,7 @@ const AdditionalAction = () => {
               Xlsx
               <input hidden type="file" onChange={importFromXlsx} />
             </Button>
-            {setting.airtable ? (
+            {setting.airtable?.url && setting.airtable?.key ? (
               <Button onClick={importAirtable}>airtable</Button>
             ) : (
               <GotoSetAirtable />
