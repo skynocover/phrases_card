@@ -98,7 +98,7 @@ export default function useSetting() {
       const totalRecords = await base.getAllRecords();
 
       const sync = totalRecords.map(async (record) => {
-        await db.cards.add({ ...record.fields, airtableId: record.id, id: undefined });
+        await db.cards.add({ ...record.fields, id: undefined });
       });
 
       await Promise.all(sync);

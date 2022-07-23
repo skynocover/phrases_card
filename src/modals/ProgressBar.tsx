@@ -31,7 +31,7 @@ export default function ProgressBar({
             }}
           >
             <Typography variant="caption" component="div" color="text.secondary">
-              {Math.round((step / max) * 100) + `%`}
+              {max > 0 ? Math.round((step / max) * 100) : 0 + `%`}
             </Typography>
           </Box>
         </Box>
