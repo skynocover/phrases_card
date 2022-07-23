@@ -7,6 +7,7 @@ import { useBackendless } from '../hooks/useBackendless';
 import { db, Card, Setting } from '../utils/index.db';
 
 const defaultSetting: Setting = {
+  id: 1,
   homeTranslate: { from: 'auto', to: 'zh-TW', autoSpeech: false },
   cardTranslate: { from: 'en', to: 'zh-TW', autoSpeech: false },
   review: { probability: [40, 30, 20, 5, 5], reviewNumber: 40 },
@@ -25,22 +26,21 @@ export default function useSetting() {
   const syncSetting = async () => {
     try {
       const localSetting = await db.setting.get(1);
-      const remoteSetting: any = await backendless.getSetting();
-      if (remoteSetting && localSetting) {
-        return await db.setting.update(1, remoteSetting);
-      }
+      const remoteSetting = await backendless.getSetting();
+
+      // if remote, update local
       if (remoteSetting) {
-        return await db.setting.add(remoteSetting);
+        if (localSetting) {
+          return await db.setting.update(1, remoteSetting);
+        }
+        return await db.setting.put({ ...remoteSetting, id: 1 } as any);
       }
+
+      // if !remote and !local, set default
       if (!localSetting) {
-        await db.setting.add(defaultSetting);
+        const currentUser = await getCurrentUser();
+        return await db.setting.put({ ...defaultSetting, id: 1, ownerId: currentUser?.objectId });
       }
-      const currentUser = await getCurrentUser();
-      await db.setting.update(1, {
-        ...(await db.setting.get(1)),
-        objectId: remoteSetting?.objectId, //check if remoteSetting is exist
-        ownerId: currentUser?.objectId, //sync the userId
-      });
     } catch (error: any) {
       setError(error);
     }
@@ -49,7 +49,10 @@ export default function useSetting() {
   const setSetting = async (inputSetting?: Setting) => {
     try {
       await db.setting.update(1, inputSetting ? inputSetting : setting);
-      await backendless.setSetting(inputSetting ? inputSetting : setting);
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        await backendless.setSetting(inputSetting ? inputSetting : setting);
+      }
     } catch (error: any) {
       setError(error);
     }

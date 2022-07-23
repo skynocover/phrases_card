@@ -13,6 +13,7 @@ export interface Card {
 }
 
 export interface Setting {
+  id: number;
   objectId?: string;
   ownerId?: string;
   homeTranslate: translateSetting;
