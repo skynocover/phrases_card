@@ -328,7 +328,7 @@ async function translate(text, from, to) {
   if (get) return get;
 
   const { data } = await axios.get(
-    `${base}?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURI(text)}`,
+    `${base}?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`,
   );
 
   cache.put(key, { lang: data[2], text: data[0]?.map((item) => item[0]) }, 1000 * 60 * 60);
